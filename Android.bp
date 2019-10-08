@@ -1,0 +1,20 @@
+rust_library_rlib {
+    name: "libc_rust",
+    crate_name: "libc",
+    edition: "2015",
+    stem: "liblibc",
+    srcs: ["src/lib.rs"],
+    host_supported: true,
+
+    features: [
+        "std",
+        "default",
+    ],
+    flags: [
+        "--cfg libc_priv_mod_use",
+        "--cfg libc_union",
+        "--cfg libc_const_size_of",
+        "--cfg libc_align",
+        "--cfg libc_core_cvoid",
+    ],
+}
