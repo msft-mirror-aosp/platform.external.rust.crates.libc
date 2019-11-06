@@ -287,6 +287,14 @@ s! {
         pub int_n_sign_posn: ::c_char,
     }
 
+    pub struct sigevent {
+        pub sigev_notify: ::c_int,
+        pub sigev_signo: ::c_int,
+        pub sigev_value: ::sigval,
+        __unused1: *mut ::c_void,       //actually a function pointer
+        pub sigev_notify_attributes: *mut ::pthread_attr_t
+    }
+
     pub struct proc_taskinfo {
         pub pti_virtual_size: u64,
         pub pti_resident_size: u64,
@@ -603,14 +611,6 @@ s_no_extra_traits!{
         pub ut_tv: ::timeval,
         pub ut_host: [::c_char; _UTX_HOSTSIZE],
         ut_pad: [u32; 16],
-    }
-
-    pub struct sigevent {
-        pub sigev_notify: ::c_int,
-        pub sigev_signo: ::c_int,
-        pub sigev_value: ::sigval,
-        __unused1: *mut ::c_void,       //actually a function pointer
-        pub sigev_notify_attributes: *mut ::pthread_attr_t
     }
 }
 
@@ -1159,39 +1159,6 @@ cfg_if! {
                 self.ut_pad.hash(state);
             }
         }
-
-        impl PartialEq for sigevent {
-            fn eq(&self, other: &sigevent) -> bool {
-                self.sigev_notify == other.sigev_notify
-                    && self.sigev_signo == other.sigev_signo
-                    && self.sigev_value == other.sigev_value
-                    && self.sigev_notify_attributes
-                        == other.sigev_notify_attributes
-            }
-        }
-
-        impl Eq for sigevent {}
-
-        impl ::fmt::Debug for sigevent {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                f.debug_struct("sigevent")
-                    .field("sigev_notify", &self.sigev_notify)
-                    .field("sigev_signo", &self.sigev_signo)
-                    .field("sigev_value", &self.sigev_value)
-                    .field("sigev_notify_attributes",
-                           &self.sigev_notify_attributes)
-                    .finish()
-            }
-        }
-
-        impl ::hash::Hash for sigevent {
-            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
-                self.sigev_notify.hash(state);
-                self.sigev_signo.hash(state);
-                self.sigev_value.hash(state);
-                self.sigev_notify_attributes.hash(state);
-            }
-        }
     }
 }
 
@@ -1737,6 +1704,11 @@ pub const TIOCPTYGRANT: ::c_uint = 0x20007454;
 pub const TIOCPTYGNAME: ::c_uint = 0x40807453;
 pub const TIOCPTYUNLK: ::c_uint = 0x20007452;
 
+pub const FIONCLEX: ::c_uint = 0x20006602;
+pub const FIONREAD: ::c_ulong = 0x4004667f;
+pub const FIOASYNC: ::c_ulong = 0x8004667d;
+pub const FIOSETOWN: ::c_ulong = 0x8004667c;
+pub const FIOGETOWN: ::c_ulong = 0x4004667b;
 pub const FIODTYPE: ::c_ulong = 0x4004667a;
 
 pub const B0: speed_t = 0;
