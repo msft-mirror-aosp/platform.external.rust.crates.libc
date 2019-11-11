@@ -31,7 +31,6 @@ pub type pthread_t = ::c_uint;
 pub type pthread_key_t = ::c_uint;
 pub type blksize_t = ::c_int;
 pub type nl_item = ::c_int;
-pub type mqd_t = *mut ::c_void;
 pub type id_t = ::c_int;
 pub type idtype_t = ::c_uint;
 
@@ -211,6 +210,15 @@ s! {
         pub sa_mask: sigset_t,
     }
 
+    pub struct sigevent {
+        pub sigev_notify: ::c_int,
+        pub sigev_signo: ::c_int,
+        pub sigev_value: ::sigval,
+        pub ss_sp: *mut ::c_void,
+        pub sigev_notify_attributes: *const ::pthread_attr_t,
+        __sigev_pad2: ::c_int,
+    }
+
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
         pub ss_size: ::size_t,
@@ -323,14 +331,6 @@ s! {
         pub if_name: *mut ::c_char,
     }
 
-    pub struct mq_attr {
-        pub mq_flags: ::c_long,
-        pub mq_maxmsg: ::c_long,
-        pub mq_msgsize: ::c_long,
-        pub mq_curmsgs: ::c_long,
-        _pad: [::c_int; 4]
-    }
-
     pub struct port_event {
         pub portev_events: ::c_int,
         pub portev_source: ::c_ushort,
@@ -391,15 +391,6 @@ s_no_extra_traits! {
         pub sdl_alen: ::c_uchar,
         pub sdl_slen: ::c_uchar,
         pub sdl_data: [::c_char; 244],
-    }
-
-    pub struct sigevent {
-        pub sigev_notify: ::c_int,
-        pub sigev_signo: ::c_int,
-        pub sigev_value: ::sigval,
-        pub ss_sp: *mut ::c_void,
-        pub sigev_notify_attributes: *const ::pthread_attr_t,
-        __sigev_pad2: ::c_int,
     }
 }
 
@@ -636,40 +627,6 @@ cfg_if! {
                 self.sdl_data.hash(state);
             }
         }
-
-        impl PartialEq for sigevent {
-            fn eq(&self, other: &sigevent) -> bool {
-                self.sigev_notify == other.sigev_notify
-                    && self.sigev_signo == other.sigev_signo
-                    && self.sigev_value == other.sigev_value
-                    && self.ss_sp == other.ss_sp
-                    && self.sigev_notify_attributes
-                        == other.sigev_notify_attributes
-            }
-        }
-        impl Eq for sigevent {}
-        impl ::fmt::Debug for sigevent {
-            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
-                f.debug_struct("sigevent")
-                    .field("sigev_notify", &self.sigev_notify)
-                    .field("sigev_signo", &self.sigev_signo)
-                    .field("sigev_value", &self.sigev_value)
-                    .field("ss_sp", &self.ss_sp)
-                    .field("sigev_notify_attributes",
-                           &self.sigev_notify_attributes)
-                    .finish()
-            }
-        }
-        impl ::hash::Hash for sigevent {
-            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
-                self.sigev_notify.hash(state);
-                self.sigev_signo.hash(state);
-                self.sigev_value.hash(state);
-                self.ss_sp.hash(state);
-                self.sigev_notify_attributes.hash(state);
-            }
-        }
-
     }
 }
 
@@ -1980,31 +1937,6 @@ extern {
     pub fn recvmsg(fd: ::c_int, msg: *mut ::msghdr, flags: ::c_int)
                    -> ::ssize_t;
 
-    pub fn mq_open(name: *const ::c_char, oflag: ::c_int, ...) -> ::mqd_t;
-    pub fn mq_close(mqd: ::mqd_t) -> ::c_int;
-    pub fn mq_unlink(name: *const ::c_char) -> ::c_int;
-    pub fn mq_receive(mqd: ::mqd_t,
-                      msg_ptr: *mut ::c_char,
-                      msg_len: ::size_t,
-                      msq_prio: *mut ::c_uint) -> ::ssize_t;
-    pub fn mq_timedreceive(mqd: ::mqd_t,
-                           msg_ptr: *mut ::c_char,
-                           msg_len: ::size_t,
-                           msq_prio: *mut ::c_uint,
-                           abs_timeout: *const ::timespec) -> ::ssize_t;
-    pub fn mq_send(mqd: ::mqd_t,
-                   msg_ptr: *const ::c_char,
-                   msg_len: ::size_t,
-                   msq_prio: ::c_uint) -> ::c_int;
-    pub fn mq_timedsend(mqd: ::mqd_t,
-                        msg_ptr: *const ::c_char,
-                        msg_len: ::size_t,
-                        msq_prio: ::c_uint,
-                        abs_timeout: *const ::timespec) -> ::c_int;
-    pub fn mq_getattr(mqd: ::mqd_t, attr: *mut ::mq_attr) -> ::c_int;
-    pub fn mq_setattr(mqd: ::mqd_t,
-                      newattr: *const ::mq_attr,
-                      oldattr: *mut ::mq_attr) -> ::c_int;
     pub fn port_create() -> ::c_int;
     pub fn port_associate(port: ::c_int, source: ::c_int, object: ::uintptr_t,
                           events: ::c_int, user: *mut ::c_void) -> ::c_int;
