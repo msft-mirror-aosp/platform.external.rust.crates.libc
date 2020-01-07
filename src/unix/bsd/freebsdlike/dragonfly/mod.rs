@@ -24,7 +24,9 @@ pub type sem_t = *mut sem;
 pub enum sem {}
 impl ::Copy for sem {}
 impl ::Clone for sem {
-    fn clone(&self) -> sem { *self }
+    fn clone(&self) -> sem {
+        *self
+    }
 }
 
 s! {
@@ -68,19 +70,6 @@ s! {
         pub mq_maxmsg: ::c_long,
         pub mq_msgsize: ::c_long,
         pub mq_curmsgs: ::c_long,
-    }
-
-    pub struct sigevent {
-        pub sigev_notify: ::c_int,
-        // The union is 8-byte in size, so it is aligned at a 8-byte offset.
-        #[cfg(target_pointer_width = "64")]
-        __unused1: ::c_int,
-        pub sigev_signo: ::c_int,       //actually a union
-        // pad the union
-        #[cfg(target_pointer_width = "64")]
-        __unused2: ::c_int,
-        pub sigev_value: ::sigval,
-        __unused3: *mut ::c_void        //actually a function pointer
     }
 
     pub struct statvfs {
@@ -234,6 +223,20 @@ s_no_extra_traits! {
         pub f_asyncreads: ::c_long,
         pub f_mntfromname: [::c_char; 90],
     }
+
+    pub struct sigevent {
+        pub sigev_notify: ::c_int,
+        // The union is 8-byte in size, so it is aligned at a 8-byte offset.
+        #[cfg(target_pointer_width = "64")]
+        __unused1: ::c_int,
+        pub sigev_signo: ::c_int,       //actually a union
+        // pad the union
+        #[cfg(target_pointer_width = "64")]
+        __unused2: ::c_int,
+        pub sigev_value: ::sigval,
+        __unused3: *mut ::c_void        //actually a function pointer
+    }
+
 }
 
 cfg_if! {
@@ -408,6 +411,31 @@ cfg_if! {
                 self.f_mntfromname.hash(state);
             }
         }
+
+        impl PartialEq for sigevent {
+            fn eq(&self, other: &sigevent) -> bool {
+                self.sigev_notify == other.sigev_notify
+                    && self.sigev_signo == other.sigev_signo
+                    && self.sigev_value == other.sigev_value
+            }
+        }
+        impl Eq for sigevent {}
+        impl ::fmt::Debug for sigevent {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("sigevent")
+                    .field("sigev_notify", &self.sigev_notify)
+                    .field("sigev_signo", &self.sigev_signo)
+                    .field("sigev_value", &self.sigev_value)
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for sigevent {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.sigev_notify.hash(state);
+                self.sigev_signo.hash(state);
+                self.sigev_value.hash(state);
+            }
+        }
     }
 }
 
@@ -425,6 +453,7 @@ pub const ENOMEDIUM: ::c_int = 93;
 pub const EASYNC: ::c_int = 99;
 pub const ELAST: ::c_int = 99;
 pub const RLIMIT_POSIXLOCKS: ::c_int = 11;
+#[deprecated(since = "0.2.64", note = "Not stable across OS versions")]
 pub const RLIM_NLIMITS: ::rlim_t = 12;
 
 pub const Q_GETQUOTA: ::c_int = 0x300;
@@ -650,7 +679,7 @@ pub const IFF_LINK1: ::c_int = 0x2000; // per link layer defined bit
 pub const IFF_LINK2: ::c_int = 0x4000; // per link layer defined bit
 pub const IFF_ALTPHYS: ::c_int = IFF_LINK2; // use alternate physical connection
 pub const IFF_MULTICAST: ::c_int = 0x8000; // supports multicast
-// was interface is in polling mode
+                                           // was interface is in polling mode
 pub const IFF_POLLING_COMPAT: ::c_int = 0x10000;
 pub const IFF_PPROMISC: ::c_int = 0x20000; // user-requested promisc mode
 pub const IFF_MONITOR: ::c_int = 0x40000; // user-requested monitor mode
@@ -884,30 +913,15 @@ pub const IPPROTO_DONE: ::c_int = 257;
 pub const IPPROTO_UNKNOWN: ::c_int = 258;
 
 // sys/netinet/tcp.h
-pub const TCP_SIGNATURE_ENABLE:   ::c_int = 16;
-pub const TCP_KEEPINIT:   ::c_int = 32;
-pub const TCP_FASTKEEP:   ::c_int = 128;
+pub const TCP_SIGNATURE_ENABLE: ::c_int = 16;
+pub const TCP_KEEPINIT: ::c_int = 32;
+pub const TCP_FASTKEEP: ::c_int = 128;
 
 pub const AF_BLUETOOTH: ::c_int = 33;
 pub const AF_MPLS: ::c_int = 34;
 pub const AF_IEEE80211: ::c_int = 35;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.55",
-    note = "If you are using this report to: \
-            https://github.com/rust-lang/libc/issues/665"
-)]
-pub const AF_MAX: ::c_int = 36;
 
 pub const PF_BLUETOOTH: ::c_int = AF_BLUETOOTH;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.55",
-    note = "If you are using this report to: \
-            https://github.com/rust-lang/libc/issues/665"
-)]
-#[allow(deprecated)]
-pub const PF_MAX: ::c_int = AF_MAX;
 
 pub const NET_RT_DUMP: ::c_int = 1;
 pub const NET_RT_FLAGS: ::c_int = 2;
@@ -915,15 +929,6 @@ pub const NET_RT_IFLIST: ::c_int = 3;
 pub const NET_RT_MAXID: ::c_int = 4;
 
 pub const SOMAXOPT_SIZE: ::c_int = 65536;
-
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.55",
-    note = "If you are using this report to: \
-            https://github.com/rust-lang/libc/issues/665"
-)]
-#[allow(deprecated)]
-pub const NET_MAXID: ::c_int = AF_MAX;
 
 pub const MSG_UNUSED09: ::c_int = 0x00000200;
 pub const MSG_NOSIGNAL: ::c_int = 0x00000400;
@@ -933,6 +938,7 @@ pub const MSG_FBLOCKING: ::c_int = 0x00010000;
 pub const MSG_FNONBLOCKING: ::c_int = 0x00020000;
 pub const MSG_FMASK: ::c_int = 0xFFFF0000;
 
+// utmpx entry types
 pub const EMPTY: ::c_short = 0;
 pub const RUN_LVL: ::c_short = 1;
 pub const BOOT_TIME: ::c_short = 2;
@@ -942,6 +948,13 @@ pub const INIT_PROCESS: ::c_short = 5;
 pub const LOGIN_PROCESS: ::c_short = 6;
 pub const USER_PROCESS: ::c_short = 7;
 pub const DEAD_PROCESS: ::c_short = 8;
+pub const ACCOUNTING: ::c_short = 9;
+pub const SIGNATURE: ::c_short = 10;
+pub const DOWNTIME: ::c_short = 11;
+// utmpx database types
+pub const UTX_DB_UTMPX: ::c_uint = 0;
+pub const UTX_DB_WTMPX: ::c_uint = 1;
+pub const UTX_DB_LASTLOG: ::c_uint = 2;
 
 pub const LC_COLLATE_MASK: ::c_int = (1 << 0);
 pub const LC_CTYPE_MASK: ::c_int = (1 << 1);
@@ -950,11 +963,11 @@ pub const LC_NUMERIC_MASK: ::c_int = (1 << 3);
 pub const LC_TIME_MASK: ::c_int = (1 << 4);
 pub const LC_MESSAGES_MASK: ::c_int = (1 << 5);
 pub const LC_ALL_MASK: ::c_int = LC_COLLATE_MASK
-                               | LC_CTYPE_MASK
-                               | LC_MESSAGES_MASK
-                               | LC_MONETARY_MASK
-                               | LC_NUMERIC_MASK
-                               | LC_TIME_MASK;
+    | LC_CTYPE_MASK
+    | LC_MESSAGES_MASK
+    | LC_MONETARY_MASK
+    | LC_NUMERIC_MASK
+    | LC_TIME_MASK;
 
 pub const TIOCSIG: ::c_uint = 0x2000745f;
 pub const BTUARTDISC: ::c_int = 0x7;
@@ -965,11 +978,11 @@ pub const TIOCMODS: ::c_ulong = 0x80047404;
 pub const TIOCREMOTE: ::c_ulong = 0x80047469;
 
 // Constants used by "at" family of system calls.
-pub const AT_FDCWD:            ::c_int = 0xFFFAFDCD; // invalid file descriptor
+pub const AT_FDCWD: ::c_int = 0xFFFAFDCD; // invalid file descriptor
 pub const AT_SYMLINK_NOFOLLOW: ::c_int = 1;
-pub const AT_REMOVEDIR:        ::c_int = 2;
-pub const AT_EACCESS:          ::c_int = 4;
-pub const AT_SYMLINK_FOLLOW:   ::c_int = 8;
+pub const AT_REMOVEDIR: ::c_int = 2;
+pub const AT_EACCESS: ::c_int = 4;
+pub const AT_SYMLINK_FOLLOW: ::c_int = 8;
 
 pub const VCHECKPT: usize = 19;
 
@@ -994,11 +1007,15 @@ pub const RTP_PRIO_THREAD: ::c_ushort = 3;
 
 // Flags for chflags(2)
 pub const UF_NOHISTORY: ::c_ulong = 0x00000040;
-pub const UF_CACHE:     ::c_ulong = 0x00000080;
-pub const UF_XLINK:     ::c_ulong = 0x00000100;
+pub const UF_CACHE: ::c_ulong = 0x00000080;
+pub const UF_XLINK: ::c_ulong = 0x00000100;
 pub const SF_NOHISTORY: ::c_ulong = 0x00400000;
-pub const SF_CACHE:     ::c_ulong = 0x00800000;
-pub const SF_XLINK:     ::c_ulong = 0x01000000;
+pub const SF_CACHE: ::c_ulong = 0x00800000;
+pub const SF_XLINK: ::c_ulong = 0x01000000;
+
+// timespec constants
+pub const UTIME_OMIT: c_long = -2;
+pub const UTIME_NOW: c_long = -1;
 
 fn _CMSG_ALIGN(n: usize) -> usize {
     (n + 3) & !3
@@ -1036,25 +1053,44 @@ f! {
     }
 }
 
-extern {
+extern "C" {
     pub fn setgrent();
-    pub fn mprotect(addr: *mut ::c_void, len: ::size_t, prot: ::c_int)
-                    -> ::c_int;
+    pub fn mprotect(
+        addr: *mut ::c_void,
+        len: ::size_t,
+        prot: ::c_int,
+    ) -> ::c_int;
     pub fn clock_getres(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
     pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
-    pub fn clock_settime(clk_id: ::clockid_t, tp: *const ::timespec) -> ::c_int;
+    pub fn clock_settime(
+        clk_id: ::clockid_t,
+        tp: *const ::timespec,
+    ) -> ::c_int;
 
     pub fn setutxdb(_type: ::c_uint, file: *mut ::c_char) -> ::c_int;
 
-    pub fn aio_waitcomplete(iocbp: *mut *mut aiocb,
-                            timeout: *mut ::timespec) -> ::c_int;
+    pub fn aio_waitcomplete(
+        iocbp: *mut *mut aiocb,
+        timeout: *mut ::timespec,
+    ) -> ::c_int;
 
     pub fn freelocale(loc: ::locale_t);
 
-    pub fn lwp_rtprio(function: ::c_int, pid: ::pid_t, lwpid: lwpid_t,
-                      rtp: *mut super::rtprio) -> ::c_int;
+    pub fn lwp_rtprio(
+        function: ::c_int,
+        pid: ::pid_t,
+        lwpid: lwpid_t,
+        rtp: *mut super::rtprio,
+    ) -> ::c_int;
 
     pub fn statfs(path: *const ::c_char, buf: *mut statfs) -> ::c_int;
     pub fn fstatfs(fd: ::c_int, buf: *mut statfs) -> ::c_int;
     pub fn uname(buf: *mut ::utsname) -> ::c_int;
+}
+
+cfg_if! {
+    if #[cfg(libc_thread_local)] {
+        mod errno;
+        pub use self::errno::*;
+    }
 }
