@@ -46,18 +46,6 @@ s! {
         pub ip6: *mut ::in6_addr,
     }
 
-    pub struct sigevent {
-        pub sigev_notify: ::c_int,
-        pub sigev_signo: ::c_int,
-        pub sigev_value: ::sigval,
-        //The rest of the structure is actually a union.  We expose only
-        //sigev_notify_thread_id because it's the most useful union member.
-        pub sigev_notify_thread_id: ::lwpid_t,
-        #[cfg(target_pointer_width = "64")]
-        __unused1: ::c_int,
-        __unused2: [::c_long; 7]
-    }
-
     pub struct statvfs {
         pub f_bavail: ::fsblkcnt_t,
         pub f_bfree: ::fsblkcnt_t,
@@ -150,6 +138,18 @@ s_no_extra_traits! {
         pub mq_msgsize: ::c_long,
         pub mq_curmsgs: ::c_long,
         __reserved: [::c_long; 4]
+    }
+
+    pub struct sigevent {
+        pub sigev_notify: ::c_int,
+        pub sigev_signo: ::c_int,
+        pub sigev_value: ::sigval,
+        //The rest of the structure is actually a union.  We expose only
+        //sigev_notify_thread_id because it's the most useful union member.
+        pub sigev_notify_thread_id: ::lwpid_t,
+        #[cfg(target_pointer_width = "64")]
+        __unused1: ::c_int,
+        __unused2: [::c_long; 7]
     }
 }
 
@@ -274,6 +274,36 @@ cfg_if! {
                 self.mq_curmsgs.hash(state);
             }
         }
+
+        impl PartialEq for sigevent {
+            fn eq(&self, other: &sigevent) -> bool {
+                self.sigev_notify == other.sigev_notify
+                    && self.sigev_signo == other.sigev_signo
+                    && self.sigev_value == other.sigev_value
+                    && self.sigev_notify_thread_id
+                        == other.sigev_notify_thread_id
+            }
+        }
+        impl Eq for sigevent {}
+        impl ::fmt::Debug for sigevent {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("sigevent")
+                    .field("sigev_notify", &self.sigev_notify)
+                    .field("sigev_signo", &self.sigev_signo)
+                    .field("sigev_value", &self.sigev_value)
+                    .field("sigev_notify_thread_id",
+                           &self.sigev_notify_thread_id)
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for sigevent {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.sigev_notify.hash(state);
+                self.sigev_signo.hash(state);
+                self.sigev_value.hash(state);
+                self.sigev_notify_thread_id.hash(state);
+            }
+        }
     }
 }
 
@@ -303,11 +333,11 @@ pub const ENOTCAPABLE: ::c_int = 93;
 pub const ECAPMODE: ::c_int = 94;
 pub const ENOTRECOVERABLE: ::c_int = 95;
 pub const EOWNERDEAD: ::c_int = 96;
-pub const ELAST: ::c_int = 96;
 pub const RLIMIT_NPTS: ::c_int = 11;
 pub const RLIMIT_SWAP: ::c_int = 12;
 pub const RLIMIT_KQUEUES: ::c_int = 13;
 pub const RLIMIT_UMTXP: ::c_int = 14;
+#[deprecated(since = "0.2.64", note = "Not stable across OS versions")]
 pub const RLIM_NLIMITS: ::rlim_t = 15;
 
 pub const Q_GETQUOTA: ::c_int = 0x700;
@@ -540,14 +570,8 @@ pub const TIOCSIG: ::c_uint = 0x2004745f;
 pub const TIOCM_DCD: ::c_int = 0x40;
 pub const H4DISC: ::c_int = 0x7;
 
-pub const FIONCLEX: ::c_ulong = 0x20006602;
-pub const FIONREAD: ::c_ulong = 0x4004667f;
-pub const FIOASYNC: ::c_ulong = 0x8004667d;
-pub const FIOSETOWN: ::c_ulong = 0x8004667c;
-pub const FIOGETOWN: ::c_ulong = 0x4004667b;
-pub const FIODTYPE: ::c_ulong = 0x4004667a;
-pub const FIOGETLBA: ::c_ulong = 0x40046679;
-pub const FIODGNAME: ::c_ulong = 0x80106678;
+pub const BIOCSETFNR: ::c_ulong = 0x80104282;
+
 pub const FIONWRITE: ::c_ulong = 0x40046677;
 pub const FIONSPACE: ::c_ulong = 0x40046676;
 pub const FIOSEEKDATA: ::c_ulong = 0xc0086661;
@@ -624,13 +648,6 @@ pub const AF_BLUETOOTH: ::c_int = 36;
 pub const AF_IEEE80211: ::c_int = 37;
 pub const AF_INET_SDP: ::c_int = 40;
 pub const AF_INET6_SDP: ::c_int = 42;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.55",
-    note = "If you are using this report to: \
-            https://github.com/rust-lang/libc/issues/665"
-)]
-pub const AF_MAX: ::c_int = 42;
 
 // https://github.com/freebsd/freebsd/blob/master/sys/net/if.h#L140
 pub const IFF_UP: ::c_int = 0x1; // (n) interface is up
@@ -638,12 +655,12 @@ pub const IFF_BROADCAST: ::c_int = 0x2; // (i) broadcast address valid
 pub const IFF_DEBUG: ::c_int = 0x4; // (n) turn on debugging
 pub const IFF_LOOPBACK: ::c_int = 0x8; // (i) is a loopback net
 pub const IFF_POINTOPOINT: ::c_int = 0x10; // (i) is a point-to-point link
-// 0x20           was IFF_SMART
+                                           // 0x20           was IFF_SMART
 pub const IFF_RUNNING: ::c_int = 0x40; // (d) resources allocated
 #[doc(hidden)]
 #[deprecated(
-    since="0.2.54",
-    note="IFF_DRV_RUNNING is deprecated. Use the portable IFF_RUNNING instead"
+    since = "0.2.54",
+    note = "IFF_DRV_RUNNING is deprecated. Use the portable IFF_RUNNING instead"
 )]
 pub const IFF_DRV_RUNNING: ::c_int = 0x40;
 pub const IFF_NOARP: ::c_int = 0x80; // (n) no address resolution protocol
@@ -653,7 +670,7 @@ pub const IFF_OACTIVE: ::c_int = 0x400; // (d) tx hardware queue is full
 #[doc(hidden)]
 #[deprecated(
     since = "0.2.54",
-    note = "Use the portable `IFF_OACTIVE` instead",
+    note = "Use the portable `IFF_OACTIVE` instead"
 )]
 pub const IFF_DRV_OACTIVE: ::c_int = 0x400;
 pub const IFF_SIMPLEX: ::c_int = 0x800; // (i) can't hear own transmissions
@@ -662,7 +679,7 @@ pub const IFF_LINK1: ::c_int = 0x2000; // per link layer defined bit
 pub const IFF_LINK2: ::c_int = 0x4000; // per link layer defined bit
 pub const IFF_ALTPHYS: ::c_int = IFF_LINK2; // use alternate physical connection
 pub const IFF_MULTICAST: ::c_int = 0x8000; // (i) supports multicast
-// (i) unconfigurable using ioctl(2)
+                                           // (i) unconfigurable using ioctl(2)
 pub const IFF_CANTCONFIG: ::c_int = 0x10000;
 pub const IFF_PPROMISC: ::c_int = 0x20000; // (n) user-requested promisc mode
 pub const IFF_MONITOR: ::c_int = 0x40000; // (n) user-requested monitor mode
@@ -922,8 +939,8 @@ pub const TCP_PCAP_IN: ::c_int = 4096;
 pub const IP_BINDANY: ::c_int = 24;
 pub const IP_BINDMULTI: ::c_int = 25;
 pub const IP_RSS_LISTEN_BUCKET: ::c_int = 26;
-pub const IP_ORIGDSTADDR : ::c_int = 27;
-pub const IP_RECVORIGDSTADDR : ::c_int = IP_ORIGDSTADDR;
+pub const IP_ORIGDSTADDR: ::c_int = 27;
+pub const IP_RECVORIGDSTADDR: ::c_int = IP_ORIGDSTADDR;
 
 pub const IP_RECVTOS: ::c_int = 68;
 
@@ -937,14 +954,6 @@ pub const PF_BLUETOOTH: ::c_int = AF_BLUETOOTH;
 pub const PF_IEEE80211: ::c_int = AF_IEEE80211;
 pub const PF_INET_SDP: ::c_int = AF_INET_SDP;
 pub const PF_INET6_SDP: ::c_int = AF_INET6_SDP;
-#[doc(hidden)]
-#[deprecated(
-    since = "0.2.55",
-    note = "If you are using this report to: \
-            https://github.com/rust-lang/libc/issues/665"
-)]
-#[allow(deprecated)]
-pub const PF_MAX: ::c_int = AF_MAX;
 
 pub const NET_RT_DUMP: ::c_int = 1;
 pub const NET_RT_FLAGS: ::c_int = 2;
@@ -961,9 +970,9 @@ pub const IPC_RMID: ::c_int = 0;
 pub const IPC_SET: ::c_int = 1;
 pub const IPC_STAT: ::c_int = 2;
 pub const IPC_INFO: ::c_int = 3;
-pub const IPC_R : ::c_int = 0o400;
-pub const IPC_W : ::c_int = 0o200;
-pub const IPC_M : ::c_int = 0o10000;
+pub const IPC_R: ::c_int = 0o400;
+pub const IPC_W: ::c_int = 0o200;
+pub const IPC_M: ::c_int = 0o10000;
 pub const MSG_NOERROR: ::c_int = 0o10000;
 pub const SHM_RDONLY: ::c_int = 0o10000;
 pub const SHM_RND: ::c_int = 0o20000;
@@ -980,20 +989,16 @@ pub const SHM_ANON: *mut ::c_char = 1 as *mut ::c_char;
 // they were all removed in svn r262489.  They remain here for backwards
 // compatibility only, and are scheduled to be removed in libc 1.0.0.
 #[doc(hidden)]
-#[deprecated(since="0.2.54",note="Removed in FreeBSD 11")]
-#[allow(deprecated)]
-pub const NET_MAXID: ::c_int = AF_MAX;
-#[doc(hidden)]
-#[deprecated(since="0.2.54",note="Removed in FreeBSD 11")]
+#[deprecated(since = "0.2.54", note = "Removed in FreeBSD 11")]
 pub const CTL_MAXID: ::c_int = 10;
 #[doc(hidden)]
-#[deprecated(since="0.2.54",note="Removed in FreeBSD 11")]
+#[deprecated(since = "0.2.54", note = "Removed in FreeBSD 11")]
 pub const KERN_MAXID: ::c_int = 38;
 #[doc(hidden)]
-#[deprecated(since="0.2.54",note="Removed in FreeBSD 11")]
+#[deprecated(since = "0.2.54", note = "Removed in FreeBSD 11")]
 pub const HW_MAXID: ::c_int = 13;
 #[doc(hidden)]
-#[deprecated(since="0.2.54",note="Removed in FreeBSD 11")]
+#[deprecated(since = "0.2.54", note = "Removed in FreeBSD 11")]
 pub const USER_MAXID: ::c_int = 21;
 #[doc(hidden)]
 pub const CTL_P1003_1B_MAXID: ::c_int = 26;
@@ -1004,6 +1009,7 @@ pub const MSG_COMPAT: ::c_int = 0x00008000;
 pub const MSG_CMSG_CLOEXEC: ::c_int = 0x00040000;
 pub const MSG_NOSIGNAL: ::c_int = 0x20000;
 
+// utmpx entry types
 pub const EMPTY: ::c_short = 0;
 pub const BOOT_TIME: ::c_short = 1;
 pub const OLD_TIME: ::c_short = 2;
@@ -1013,19 +1019,23 @@ pub const INIT_PROCESS: ::c_short = 5;
 pub const LOGIN_PROCESS: ::c_short = 6;
 pub const DEAD_PROCESS: ::c_short = 7;
 pub const SHUTDOWN_TIME: ::c_short = 8;
+// utmp database types
+pub const UTXDB_ACTIVE: ::c_int = 0;
+pub const UTXDB_LASTLOGIN: ::c_int = 1;
+pub const UTXDB_LOG: ::c_int = 2;
 
 pub const LC_COLLATE_MASK: ::c_int = (1 << 0);
 pub const LC_CTYPE_MASK: ::c_int = (1 << 1);
-pub const LC_MONETARY_MASK: ::c_int =(1 << 2);
+pub const LC_MONETARY_MASK: ::c_int = (1 << 2);
 pub const LC_NUMERIC_MASK: ::c_int = (1 << 3);
 pub const LC_TIME_MASK: ::c_int = (1 << 4);
 pub const LC_MESSAGES_MASK: ::c_int = (1 << 5);
 pub const LC_ALL_MASK: ::c_int = LC_COLLATE_MASK
-                               | LC_CTYPE_MASK
-                               | LC_MESSAGES_MASK
-                               | LC_MONETARY_MASK
-                               | LC_NUMERIC_MASK
-                               | LC_TIME_MASK;
+    | LC_CTYPE_MASK
+    | LC_MESSAGES_MASK
+    | LC_MONETARY_MASK
+    | LC_NUMERIC_MASK
+    | LC_TIME_MASK;
 
 pub const WSTOPPED: ::c_int = 2; // same as WUNTRACED
 pub const WCONTINUED: ::c_int = 4;
@@ -1038,6 +1048,9 @@ pub const WTRAPPED: ::c_int = 32;
 pub const P_PID: idtype_t = 0;
 pub const P_PGID: idtype_t = 2;
 pub const P_ALL: idtype_t = 7;
+
+pub const UTIME_OMIT: c_long = -2;
+pub const UTIME_NOW: c_long = -1;
 
 pub const B460800: ::speed_t = 460800;
 pub const B921600: ::speed_t = 921600;
@@ -1077,14 +1090,14 @@ pub const POSIX_SPAWN_SETSIGDEF: ::c_int = 0x10;
 pub const POSIX_SPAWN_SETSIGMASK: ::c_int = 0x20;
 
 // Flags for chflags(2)
-pub const UF_SYSTEM:    ::c_ulong = 0x00000080;
-pub const UF_SPARSE:    ::c_ulong = 0x00000100;
-pub const UF_OFFLINE:   ::c_ulong = 0x00000200;
-pub const UF_REPARSE:   ::c_ulong = 0x00000400;
-pub const UF_ARCHIVE:   ::c_ulong = 0x00000800;
-pub const UF_READONLY:  ::c_ulong = 0x00001000;
-pub const UF_HIDDEN:    ::c_ulong = 0x00008000;
-pub const SF_SNAPSHOT:  ::c_ulong = 0x00200000;
+pub const UF_SYSTEM: ::c_ulong = 0x00000080;
+pub const UF_SPARSE: ::c_ulong = 0x00000100;
+pub const UF_OFFLINE: ::c_ulong = 0x00000200;
+pub const UF_REPARSE: ::c_ulong = 0x00000400;
+pub const UF_ARCHIVE: ::c_ulong = 0x00000800;
+pub const UF_READONLY: ::c_ulong = 0x00001000;
+pub const UF_HIDDEN: ::c_ulong = 0x00008000;
+pub const SF_SNAPSHOT: ::c_ulong = 0x00200000;
 
 fn _ALIGN(p: usize) -> usize {
     (p + _ALIGNBYTES) & !_ALIGNBYTES
@@ -1128,151 +1141,241 @@ f! {
     }
 }
 
-extern {
+extern "C" {
     pub fn __error() -> *mut ::c_int;
 
     pub fn clock_getres(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
     pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
-    pub fn clock_settime(clk_id: ::clockid_t, tp: *const ::timespec) -> ::c_int;
+    pub fn clock_settime(
+        clk_id: ::clockid_t,
+        tp: *const ::timespec,
+    ) -> ::c_int;
 
-    pub fn extattr_delete_fd(fd: ::c_int,
-                             attrnamespace: ::c_int,
-                             attrname: *const ::c_char) -> ::c_int;
-    pub fn extattr_delete_file(path: *const ::c_char,
-                               attrnamespace: ::c_int,
-                               attrname: *const ::c_char) -> ::c_int;
-    pub fn extattr_delete_link(path: *const ::c_char,
-                               attrnamespace: ::c_int,
-                               attrname: *const ::c_char) -> ::c_int;
-    pub fn extattr_get_fd(fd: ::c_int,
-                          attrnamespace: ::c_int,
-                          attrname: *const ::c_char,
-                          data: *mut ::c_void,
-                          nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_get_file(path: *const ::c_char,
-                            attrnamespace: ::c_int,
-                            attrname: *const ::c_char,
-                            data: *mut ::c_void,
-                            nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_get_link(path: *const ::c_char,
-                            attrnamespace: ::c_int,
-                            attrname: *const ::c_char,
-                            data: *mut ::c_void,
-                            nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_list_fd(fd: ::c_int,
-                           attrnamespace: ::c_int,
-                           data: *mut ::c_void,
-                           nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_list_file(path: *const ::c_char,
-                             attrnamespace: ::c_int,
-                             data: *mut ::c_void,
-                             nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_list_link(path: *const ::c_char,
-                             attrnamespace: ::c_int,
-                             data: *mut ::c_void,
-                             nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_set_fd(fd: ::c_int,
-                          attrnamespace: ::c_int,
-                          attrname: *const ::c_char,
-                          data: *const ::c_void,
-                          nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_set_file(path: *const ::c_char,
-                            attrnamespace: ::c_int,
-                            attrname: *const ::c_char,
-                            data: *const ::c_void,
-                            nbytes: ::size_t) -> ::ssize_t;
-    pub fn extattr_set_link(path: *const ::c_char,
-                            attrnamespace: ::c_int,
-                            attrname: *const ::c_char,
-                            data: *const ::c_void,
-                            nbytes: ::size_t) -> ::ssize_t;
+    pub fn extattr_delete_fd(
+        fd: ::c_int,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+    ) -> ::c_int;
+    pub fn extattr_delete_file(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+    ) -> ::c_int;
+    pub fn extattr_delete_link(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+    ) -> ::c_int;
+    pub fn extattr_get_fd(
+        fd: ::c_int,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_get_file(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_get_link(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_list_fd(
+        fd: ::c_int,
+        attrnamespace: ::c_int,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_list_file(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_list_link(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        data: *mut ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_set_fd(
+        fd: ::c_int,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *const ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_set_file(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *const ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
+    pub fn extattr_set_link(
+        path: *const ::c_char,
+        attrnamespace: ::c_int,
+        attrname: *const ::c_char,
+        data: *const ::c_void,
+        nbytes: ::size_t,
+    ) -> ::ssize_t;
 
     pub fn jail(jail: *mut ::jail) -> ::c_int;
     pub fn jail_attach(jid: ::c_int) -> ::c_int;
     pub fn jail_remove(jid: ::c_int) -> ::c_int;
-    pub fn jail_get(iov: *mut ::iovec, niov: ::c_uint, flags: ::c_int)
-                    -> ::c_int;
-    pub fn jail_set(iov: *mut ::iovec, niov: ::c_uint, flags: ::c_int)
-                    -> ::c_int;
+    pub fn jail_get(
+        iov: *mut ::iovec,
+        niov: ::c_uint,
+        flags: ::c_int,
+    ) -> ::c_int;
+    pub fn jail_set(
+        iov: *mut ::iovec,
+        niov: ::c_uint,
+        flags: ::c_int,
+    ) -> ::c_int;
 
     pub fn fdatasync(fd: ::c_int) -> ::c_int;
-    pub fn posix_fallocate(fd: ::c_int, offset: ::off_t,
-                           len: ::off_t) -> ::c_int;
-    pub fn posix_fadvise(fd: ::c_int, offset: ::off_t, len: ::off_t,
-                         advise: ::c_int) -> ::c_int;
+    pub fn posix_fallocate(
+        fd: ::c_int,
+        offset: ::off_t,
+        len: ::off_t,
+    ) -> ::c_int;
+    pub fn posix_fadvise(
+        fd: ::c_int,
+        offset: ::off_t,
+        len: ::off_t,
+        advise: ::c_int,
+    ) -> ::c_int;
     pub fn mkostemp(template: *mut ::c_char, flags: ::c_int) -> ::c_int;
-    pub fn mkostemps(template: *mut ::c_char,
-                     suffixlen: ::c_int,
-                     flags: ::c_int) -> ::c_int;
+    pub fn mkostemps(
+        template: *mut ::c_char,
+        suffixlen: ::c_int,
+        flags: ::c_int,
+    ) -> ::c_int;
 
     pub fn getutxuser(user: *const ::c_char) -> *mut utmpx;
     pub fn setutxdb(_type: ::c_int, file: *const ::c_char) -> ::c_int;
 
-    pub fn aio_waitcomplete(iocbp: *mut *mut aiocb,
-                            timeout: *mut ::timespec) -> ::ssize_t;
+    pub fn aio_waitcomplete(
+        iocbp: *mut *mut aiocb,
+        timeout: *mut ::timespec,
+    ) -> ::ssize_t;
     pub fn mq_getfd_np(mqd: ::mqd_t) -> ::c_int;
 
-    pub fn waitid(idtype: idtype_t, id: ::id_t, infop: *mut ::siginfo_t,
-                  options: ::c_int) -> ::c_int;
+    pub fn waitid(
+        idtype: idtype_t,
+        id: ::id_t,
+        infop: *mut ::siginfo_t,
+        options: ::c_int,
+    ) -> ::c_int;
 
     pub fn ftok(pathname: *const ::c_char, proj_id: ::c_int) -> ::key_t;
     pub fn shmget(key: ::key_t, size: ::size_t, shmflg: ::c_int) -> ::c_int;
-    pub fn shmat(shmid: ::c_int, shmaddr: *const ::c_void,
-        shmflg: ::c_int) -> *mut ::c_void;
+    pub fn shmat(
+        shmid: ::c_int,
+        shmaddr: *const ::c_void,
+        shmflg: ::c_int,
+    ) -> *mut ::c_void;
     pub fn shmdt(shmaddr: *const ::c_void) -> ::c_int;
-    pub fn shmctl(shmid: ::c_int, cmd: ::c_int,
-        buf: *mut ::shmid_ds) -> ::c_int;
-    pub fn msgctl(msqid: ::c_int, cmd: ::c_int,
-        buf: *mut ::msqid_ds) -> ::c_int;
+    pub fn shmctl(
+        shmid: ::c_int,
+        cmd: ::c_int,
+        buf: *mut ::shmid_ds,
+    ) -> ::c_int;
+    pub fn msgctl(
+        msqid: ::c_int,
+        cmd: ::c_int,
+        buf: *mut ::msqid_ds,
+    ) -> ::c_int;
     pub fn msgget(key: ::key_t, msgflg: ::c_int) -> ::c_int;
-    pub fn msgsnd(msqid: ::c_int, msgp: *const ::c_void, msgsz: ::size_t,
-        msgflg: ::c_int) -> ::c_int;
+    pub fn msgsnd(
+        msqid: ::c_int,
+        msgp: *const ::c_void,
+        msgsz: ::size_t,
+        msgflg: ::c_int,
+    ) -> ::c_int;
     pub fn cfmakesane(termios: *mut ::termios);
-    pub fn fexecve(fd: ::c_int, argv: *const *const ::c_char,
-                   envp: *const *const ::c_char)
-                   -> ::c_int;
+    pub fn fexecve(
+        fd: ::c_int,
+        argv: *const *const ::c_char,
+        envp: *const *const ::c_char,
+    ) -> ::c_int;
 
     pub fn pdfork(fdp: *mut ::c_int, flags: ::c_int) -> ::pid_t;
     pub fn pdgetpid(fd: ::c_int, pidp: *mut ::pid_t) -> ::c_int;
     pub fn pdkill(fd: ::c_int, signum: ::c_int) -> ::c_int;
 
-    pub fn rtprio_thread(function: ::c_int, lwpid: ::lwpid_t,
-                         rtp: *mut super::rtprio) -> ::c_int;
+    pub fn rtprio_thread(
+        function: ::c_int,
+        lwpid: ::lwpid_t,
+        rtp: *mut super::rtprio,
+    ) -> ::c_int;
 
-    pub fn posix_spawn(pid: *mut ::pid_t,
-                       path: *const ::c_char,
-                       file_actions: *const ::posix_spawn_file_actions_t,
-                       attrp: *const ::posix_spawnattr_t,
-                       argv: *const *mut ::c_char,
-                       envp: *const *mut ::c_char) -> ::c_int;
-    pub fn posix_spawnp(pid: *mut ::pid_t,
-                       file: *const ::c_char,
-                        file_actions: *const ::posix_spawn_file_actions_t,
-                        attrp: *const ::posix_spawnattr_t,
-                        argv: *const *mut ::c_char,
-                        envp: *const *mut ::c_char) -> ::c_int;
+    pub fn posix_spawn(
+        pid: *mut ::pid_t,
+        path: *const ::c_char,
+        file_actions: *const ::posix_spawn_file_actions_t,
+        attrp: *const ::posix_spawnattr_t,
+        argv: *const *mut ::c_char,
+        envp: *const *mut ::c_char,
+    ) -> ::c_int;
+    pub fn posix_spawnp(
+        pid: *mut ::pid_t,
+        file: *const ::c_char,
+        file_actions: *const ::posix_spawn_file_actions_t,
+        attrp: *const ::posix_spawnattr_t,
+        argv: *const *mut ::c_char,
+        envp: *const *mut ::c_char,
+    ) -> ::c_int;
     pub fn posix_spawnattr_init(attr: *mut posix_spawnattr_t) -> ::c_int;
     pub fn posix_spawnattr_destroy(attr: *mut posix_spawnattr_t) -> ::c_int;
-    pub fn posix_spawnattr_getsigdefault(attr: *const posix_spawnattr_t,
-                                         default: *mut ::sigset_t) -> ::c_int;
-    pub fn posix_spawnattr_setsigdefault(attr: *mut posix_spawnattr_t,
-                                         default: *const ::sigset_t) -> ::c_int;
-    pub fn posix_spawnattr_getsigmask(attr: *const posix_spawnattr_t,
-                                      default: *mut ::sigset_t) -> ::c_int;
-    pub fn posix_spawnattr_setsigmask(attr: *mut posix_spawnattr_t,
-                                      default: *const ::sigset_t) -> ::c_int;
-    pub fn posix_spawnattr_getflags(attr: *const posix_spawnattr_t,
-                                    flags: *mut ::c_short) -> ::c_int;
-    pub fn posix_spawnattr_setflags(attr: *mut posix_spawnattr_t,
-                                    flags: ::c_short) -> ::c_int;
-    pub fn posix_spawnattr_getpgroup(attr: *const posix_spawnattr_t,
-                                     flags: *mut ::pid_t) -> ::c_int;
-    pub fn posix_spawnattr_setpgroup(attr: *mut posix_spawnattr_t,
-                                     flags: ::pid_t) -> ::c_int;
-    pub fn posix_spawnattr_getschedpolicy(attr: *const posix_spawnattr_t,
-                                          flags: *mut ::c_int) -> ::c_int;
-    pub fn posix_spawnattr_setschedpolicy(attr: *mut posix_spawnattr_t,
-                                          flags: ::c_int) -> ::c_int;
+    pub fn posix_spawnattr_getsigdefault(
+        attr: *const posix_spawnattr_t,
+        default: *mut ::sigset_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_setsigdefault(
+        attr: *mut posix_spawnattr_t,
+        default: *const ::sigset_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_getsigmask(
+        attr: *const posix_spawnattr_t,
+        default: *mut ::sigset_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_setsigmask(
+        attr: *mut posix_spawnattr_t,
+        default: *const ::sigset_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_getflags(
+        attr: *const posix_spawnattr_t,
+        flags: *mut ::c_short,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_setflags(
+        attr: *mut posix_spawnattr_t,
+        flags: ::c_short,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_getpgroup(
+        attr: *const posix_spawnattr_t,
+        flags: *mut ::pid_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_setpgroup(
+        attr: *mut posix_spawnattr_t,
+        flags: ::pid_t,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_getschedpolicy(
+        attr: *const posix_spawnattr_t,
+        flags: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn posix_spawnattr_setschedpolicy(
+        attr: *mut posix_spawnattr_t,
+        flags: ::c_int,
+    ) -> ::c_int;
     pub fn posix_spawnattr_getschedparam(
         attr: *const posix_spawnattr_t,
         param: *mut ::sched_param,
@@ -1305,33 +1408,59 @@ extern {
         newfd: ::c_int,
     ) -> ::c_int;
 
+    #[cfg_attr(
+        all(target_os = "freebsd", freebsd11),
+        link_name = "statfs@FBSD_1.0"
+    )]
     pub fn statfs(path: *const ::c_char, buf: *mut statfs) -> ::c_int;
+    #[cfg_attr(
+        all(target_os = "freebsd", freebsd11),
+        link_name = "fstatfs@FBSD_1.0"
+    )]
     pub fn fstatfs(fd: ::c_int, buf: *mut statfs) -> ::c_int;
 
     pub fn dup3(src: ::c_int, dst: ::c_int, flags: ::c_int) -> ::c_int;
     pub fn __xuname(nmln: ::c_int, buf: *mut ::c_void) -> ::c_int;
 
-    pub fn sendmmsg(sockfd: ::c_int, msgvec: *mut ::mmsghdr, vlen: ::size_t,
-                    flags: ::c_int) -> ::ssize_t;
-    pub fn recvmmsg(sockfd: ::c_int, msgvec: *mut ::mmsghdr, vlen: ::size_t,
-                    flags: ::c_int, timeout: *const ::timespec) -> ::ssize_t;
+    pub fn sendmmsg(
+        sockfd: ::c_int,
+        msgvec: *mut ::mmsghdr,
+        vlen: ::size_t,
+        flags: ::c_int,
+    ) -> ::ssize_t;
+    pub fn recvmmsg(
+        sockfd: ::c_int,
+        msgvec: *mut ::mmsghdr,
+        vlen: ::size_t,
+        flags: ::c_int,
+        timeout: *const ::timespec,
+    ) -> ::ssize_t;
 }
 
 #[link(name = "util")]
-extern {
-    pub fn extattr_namespace_to_string(attrnamespace: ::c_int,
-                                       string: *mut *mut ::c_char) -> ::c_int;
-    pub fn extattr_string_to_namespace(string: *const ::c_char,
-                                       attrnamespace: *mut ::c_int) -> ::c_int;
+extern "C" {
+    pub fn extattr_namespace_to_string(
+        attrnamespace: ::c_int,
+        string: *mut *mut ::c_char,
+    ) -> ::c_int;
+    pub fn extattr_string_to_namespace(
+        string: *const ::c_char,
+        attrnamespace: *mut ::c_int,
+    ) -> ::c_int;
 }
 
 cfg_if! {
     if #[cfg(freebsd12)] {
         mod freebsd12;
         pub use self::freebsd12::*;
-    } else {
+    } else if #[cfg(freebsd13)] {
+        mod freebsd12;
+        pub use self::freebsd12::*;
+    } else if #[cfg(any(freebsd10, freebsd11))] {
         mod freebsd11;
         pub use self::freebsd11::*;
+    } else {
+        // Unknown freebsd version
     }
 }
 

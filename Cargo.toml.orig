@@ -1,6 +1,6 @@
 [package]
 name = "libc"
-version = "0.2.58"
+version = "0.2.66"
 authors = ["The Rust Project Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -10,7 +10,7 @@ documentation = "http://doc.rust-lang.org/libc"
 keywords = ["libc", "ffi", "bindings", "operating", "system" ]
 categories = ["external-ffi-bindings", "no-std", "os"]
 build = "build.rs"
-exclude = ["/ci/*", "/.travis.yml", "/appveyor.yml"]
+exclude = ["/ci/*", "/azure-pipelines.yml"]
 description = """
 Raw FFI bindings to platform libraries like libc.
 """
@@ -28,6 +28,7 @@ std = []
 align = []
 rustc-dep-of-std = ['align', 'rustc-std-workspace-core']
 extra_traits = []
+const-extern-fn = []
 # use_std is deprecated, use `std` instead
 use_std = [ 'std' ]
 

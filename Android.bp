@@ -11,8 +11,10 @@ rust_library_rlib {
         "std",
     ],
     flags: [
+        "--cfg freebsd11",
         "--cfg libc_align",
         "--cfg libc_const_size_of",
+        "--cfg libc_conts_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
         "--cfg libc_priv_mod_use",
