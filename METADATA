@@ -10,6 +10,7 @@ third_party {
     value: "https://github.com/rust-lang/libc"
   }
   version: "0.2.69"
+  license_type: NOTICE
   last_upgrade_date {
     year: 2020
     month: 4
