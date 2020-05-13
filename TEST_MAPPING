@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "libc_tests_const_fn",
+      "host": true
+    },
+    {
+      "name": "libc_tests_libc",
+      "host": true
+    }
+  ]
+}
