@@ -1160,6 +1160,8 @@ pub const TIOCMBIC: ::c_int = 0x5417;
 pub const TIOCMSET: ::c_int = 0x5418;
 pub const FIONREAD: ::c_int = 0x541B;
 pub const TIOCCONS: ::c_int = 0x541D;
+pub const TIOCSBRK: ::c_int = 0x5427;
+pub const TIOCCBRK: ::c_int = 0x5428;
 
 pub const ST_RDONLY: ::c_ulong = 1;
 pub const ST_NOSUID: ::c_ulong = 2;
@@ -2141,6 +2143,10 @@ pub const EPIPE: ::c_int = 32;
 pub const EDOM: ::c_int = 33;
 pub const ERANGE: ::c_int = 34;
 pub const EWOULDBLOCK: ::c_int = EAGAIN;
+
+pub const PRIO_PROCESS: ::c_int = 0;
+pub const PRIO_PGRP: ::c_int = 1;
+pub const PRIO_USER: ::c_int = 2;
 
 f! {
     pub fn CMSG_NXTHDR(mhdr: *const msghdr,
