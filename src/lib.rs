@@ -30,6 +30,9 @@
 #![cfg_attr(target_os = "redox", feature(static_nobundle))]
 #![cfg_attr(libc_const_extern_fn, feature(const_extern_fn))]
 
+// ANDROID: Use std to allow building as a dylib.
+extern crate std;
+
 #[macro_use]
 mod macros;
 

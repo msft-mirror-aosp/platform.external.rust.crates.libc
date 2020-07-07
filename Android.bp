@@ -20,7 +20,7 @@ rust_test_host {
         "--cfg libc_priv_mod_use",
         "--cfg libc_union",
     ],
-    rlibs: [
+    rustlibs: [
         "liblibc",
     ],
 }
@@ -47,7 +47,7 @@ rust_test_host {
     ],
 }
 
-rust_library_rlib {
+rust_library {
     name: "liblibc",
     host_supported: true,
     crate_name: "libc",
