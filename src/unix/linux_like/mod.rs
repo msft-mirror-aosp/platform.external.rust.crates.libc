@@ -961,6 +961,17 @@ pub const WEXITED: ::c_int = 0x00000004;
 pub const WCONTINUED: ::c_int = 0x00000008;
 pub const WNOWAIT: ::c_int = 0x01000000;
 
+// Options for personality(2).
+pub const ADDR_NO_RANDOMIZE: ::c_int = 0x0040000;
+pub const MMAP_PAGE_ZERO: ::c_int = 0x0100000;
+pub const ADDR_COMPAT_LAYOUT: ::c_int = 0x0200000;
+pub const READ_IMPLIES_EXEC: ::c_int = 0x0400000;
+pub const ADDR_LIMIT_32BIT: ::c_int = 0x0800000;
+pub const SHORT_INODE: ::c_int = 0x1000000;
+pub const WHOLE_SECONDS: ::c_int = 0x2000000;
+pub const STICKY_TIMEOUTS: ::c_int = 0x4000000;
+pub const ADDR_LIMIT_3GB: ::c_int = 0x8000000;
+
 // Options set using PTRACE_SETOPTIONS.
 pub const PTRACE_O_TRACESYSGOOD: ::c_int = 0x00000001;
 pub const PTRACE_O_TRACEFORK: ::c_int = 0x00000002;
@@ -1016,6 +1027,13 @@ pub const PIPE_BUF: usize = 4096;
 
 pub const SI_LOAD_SHIFT: ::c_uint = 16;
 
+pub const CLD_EXITED: ::c_int = 1;
+pub const CLD_KILLED: ::c_int = 2;
+pub const CLD_DUMPED: ::c_int = 3;
+pub const CLD_TRAPPED: ::c_int = 4;
+pub const CLD_STOPPED: ::c_int = 5;
+pub const CLD_CONTINUED: ::c_int = 6;
+
 pub const SIGEV_SIGNAL: ::c_int = 0;
 pub const SIGEV_NONE: ::c_int = 1;
 pub const SIGEV_THREAD: ::c_int = 2;
@@ -1023,6 +1041,11 @@ pub const SIGEV_THREAD: ::c_int = 2;
 pub const P_ALL: idtype_t = 0;
 pub const P_PID: idtype_t = 1;
 pub const P_PGID: idtype_t = 2;
+cfg_if! {
+    if #[cfg(not(target_os = "emscripten"))] {
+        pub const P_PIDFD: idtype_t = 3;
+    }
+}
 
 pub const UTIME_OMIT: c_long = 1073741822;
 pub const UTIME_NOW: c_long = 1073741823;
@@ -1241,6 +1264,14 @@ f! {
 
     pub fn WCOREDUMP(status: ::c_int) -> bool {
         (status & 0x80) != 0
+    }
+
+    pub fn W_EXITCODE(ret: ::c_int, sig: ::c_int) -> ::c_int {
+        (ret << 8) | sig
+    }
+
+    pub fn W_STOPCODE(sig: ::c_int) -> ::c_int {
+        (sig << 8) | 0x7f
     }
 
     pub fn QCMD(cmd: ::c_int, type_: ::c_int) -> ::c_int {

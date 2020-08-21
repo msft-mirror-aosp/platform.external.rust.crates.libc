@@ -35,6 +35,8 @@ pub type shmatt_t = ::c_ushort;
 pub type sae_associd_t = u32;
 pub type sae_connid_t = u32;
 
+pub type mach_port_t = ::c_uint;
+
 deprecated_mach! {
     pub type vm_prot_t = ::c_int;
     pub type vm_size_t = ::uintptr_t;
@@ -679,6 +681,14 @@ impl siginfo_t {
         }
 
         (*(self as *const siginfo_t as *const siginfo_timer)).si_value
+    }
+
+    pub unsafe fn si_pid(&self) -> ::pid_t {
+        self.si_pid
+    }
+
+    pub unsafe fn si_uid(&self) -> ::uid_t {
+        self.si_uid
     }
 }
 
@@ -3395,6 +3405,7 @@ extern "C" {
         name: *mut ::c_char,
         len: ::size_t,
     ) -> ::c_int;
+    pub fn pthread_from_mach_thread_np(port: ::mach_port_t) -> ::pthread_t;
     pub fn pthread_get_stackaddr_np(thread: ::pthread_t) -> *mut ::c_void;
     pub fn pthread_get_stacksize_np(thread: ::pthread_t) -> ::size_t;
     pub fn pthread_condattr_setpshared(
