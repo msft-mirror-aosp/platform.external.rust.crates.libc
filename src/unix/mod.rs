@@ -419,6 +419,19 @@ extern "C" {
         mode: *const c_char,
         file: *mut FILE,
     ) -> *mut FILE;
+    pub fn fmemopen(
+        buf: *mut c_void,
+        size: size_t,
+        mode: *const c_char,
+    ) -> *mut FILE;
+    pub fn open_memstream(
+        ptr: *mut *mut c_char,
+        sizeloc: *mut size_t,
+    ) -> *mut FILE;
+    pub fn open_wmemstream(
+        ptr: *mut *mut wchar_t,
+        sizeloc: *mut size_t,
+    ) -> *mut FILE;
     pub fn fflush(file: *mut FILE) -> c_int;
     pub fn fclose(file: *mut FILE) -> c_int;
     pub fn remove(filename: *const c_char) -> c_int;
@@ -596,9 +609,13 @@ extern "C" {
     pub fn getchar_unlocked() -> ::c_int;
     pub fn putchar_unlocked(c: ::c_int) -> ::c_int;
 
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(target_os = "netbsd", link_name = "__socket30")]
     #[cfg_attr(target_os = "illumos", link_name = "__xnet_socket")]
     pub fn socket(domain: ::c_int, ty: ::c_int, protocol: ::c_int) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "connect$UNIX2003"
@@ -614,6 +631,8 @@ extern "C" {
         link_name = "listen$UNIX2003"
     )]
     pub fn listen(socket: ::c_int, backlog: ::c_int) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "accept$UNIX2003"
@@ -623,6 +642,8 @@ extern "C" {
         address: *mut sockaddr,
         address_len: *mut socklen_t,
     ) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "getpeername$UNIX2003"
@@ -632,6 +653,8 @@ extern "C" {
         address: *mut sockaddr,
         address_len: *mut socklen_t,
     ) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "getsockname$UNIX2003"
@@ -659,6 +682,8 @@ extern "C" {
         protocol: ::c_int,
         socket_vector: *mut ::c_int,
     ) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "sendto$UNIX2003"
@@ -1234,6 +1259,8 @@ extern "C" {
     pub fn dlclose(handle: *mut ::c_void) -> ::c_int;
     pub fn dladdr(addr: *const ::c_void, info: *mut Dl_info) -> ::c_int;
 
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     #[cfg_attr(target_os = "illumos", link_name = "__xnet_getaddrinfo")]
     pub fn getaddrinfo(
         node: *const c_char,
@@ -1241,6 +1268,8 @@ extern "C" {
         hints: *const addrinfo,
         res: *mut *mut addrinfo,
     ) -> ::c_int;
+    #[cfg(not(all(libc_cfg_target_vendor, target_arch = "powerpc",
+          target_vendor = "nintendo")))]
     pub fn freeaddrinfo(res: *mut addrinfo);
     pub fn gai_strerror(errcode: ::c_int) -> *const ::c_char;
     #[cfg_attr(
