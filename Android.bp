@@ -14,6 +14,7 @@ rust_defaults {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
@@ -46,6 +47,7 @@ rust_defaults {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
@@ -80,6 +82,7 @@ rust_library {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
