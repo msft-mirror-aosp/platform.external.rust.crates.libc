@@ -121,6 +121,36 @@ macro_rules! s_no_extra_traits {
     );
 }
 
+#[allow(unused_macros)]
+macro_rules! e {
+    ($($(#[$attr:meta])* pub enum $i:ident { $($field:tt)* })*) => ($(
+        __item! {
+            #[cfg_attr(feature = "extra_traits", derive(Debug, Eq, Hash, PartialEq))]
+            $(#[$attr])*
+            pub enum $i { $($field)* }
+        }
+        impl ::Copy for $i {}
+        impl ::Clone for $i {
+            fn clone(&self) -> $i { *self }
+        }
+    )*);
+}
+
+#[allow(unused_macros)]
+macro_rules! s_paren {
+    ($($(#[$attr:meta])* pub struct $i:ident ( $($field:tt)* ); )* ) => ($(
+        __item! {
+            #[cfg_attr(feature = "extra_traits", derive(Debug, Eq, Hash, PartialEq))]
+            $(#[$attr])*
+            pub struct $i ( $($field)* );
+        }
+        impl ::Copy for $i {}
+        impl ::Clone for $i {
+            fn clone(&self) -> $i { *self }
+        }
+    )*);
+}
+
 // This is a pretty horrible hack to allow us to conditionally mark
 // some functions as 'const', without requiring users of this macro
 // to care about the "const-extern-fn" feature.
@@ -166,6 +196,21 @@ cfg_if! {
         }
 
         #[allow(unused_macros)]
+        macro_rules! safe_f {
+            ($(pub $({$constness:ident})* fn $i:ident(
+                        $($arg:ident: $argty:ty),*
+            ) -> $ret:ty {
+                $($body:stmt);*
+            })*) => ($(
+                #[inline]
+                pub $($constness)* extern fn $i($($arg: $argty),*
+                ) -> $ret {
+                    $($body);*
+                }
+            )*)
+        }
+
+        #[allow(unused_macros)]
         macro_rules! const_fn {
             ($($({$constness:ident})* fn $i:ident(
                         $($arg:ident: $argty:ty),*
@@ -190,6 +235,21 @@ cfg_if! {
             })*) => ($(
                 #[inline]
                 pub unsafe extern fn $i($($arg: $argty),*
+                ) -> $ret {
+                    $($body);*
+                }
+            )*)
+        }
+
+        #[allow(unused_macros)]
+        macro_rules! safe_f {
+            ($(pub $({$constness:ident})* fn $i:ident(
+                        $($arg:ident: $argty:ty),*
+            ) -> $ret:ty {
+                $($body:stmt);*
+            })*) => ($(
+                #[inline]
+                pub extern fn $i($($arg: $argty),*
                 ) -> $ret {
                     $($body);*
                 }

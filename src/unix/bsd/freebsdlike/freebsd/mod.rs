@@ -116,6 +116,19 @@ s! {
         pub sc_ngroups: ::c_int,
         pub sc_groups: [::gid_t; 1],
     }
+
+    pub struct ptrace_vm_entry {
+        pub pve_entry: ::c_int,
+        pub pve_timestamp: ::c_int,
+        pub pve_start: ::c_ulong,
+        pub pve_end: ::c_ulong,
+        pub pve_offset: ::c_ulong,
+        pub pve_prot: ::c_uint,
+        pub pve_pathlen: ::c_uint,
+        pub pve_fileid: ::c_long,
+        pub pve_fsid: u32,
+        pub pve_path: *mut ::c_char,
+    }
 }
 
 s_no_extra_traits! {
@@ -433,21 +446,6 @@ pub const NOTE_NSECONDS: u32 = 0x00000008;
 
 pub const MADV_PROTECT: ::c_int = 10;
 pub const RUSAGE_THREAD: ::c_int = 1;
-
-pub const CLOCK_REALTIME: ::clockid_t = 0;
-pub const CLOCK_VIRTUAL: ::clockid_t = 1;
-pub const CLOCK_PROF: ::clockid_t = 2;
-pub const CLOCK_MONOTONIC: ::clockid_t = 4;
-pub const CLOCK_UPTIME: ::clockid_t = 5;
-pub const CLOCK_UPTIME_PRECISE: ::clockid_t = 7;
-pub const CLOCK_UPTIME_FAST: ::clockid_t = 8;
-pub const CLOCK_REALTIME_PRECISE: ::clockid_t = 9;
-pub const CLOCK_REALTIME_FAST: ::clockid_t = 10;
-pub const CLOCK_MONOTONIC_PRECISE: ::clockid_t = 11;
-pub const CLOCK_MONOTONIC_FAST: ::clockid_t = 12;
-pub const CLOCK_SECOND: ::clockid_t = 13;
-pub const CLOCK_THREAD_CPUTIME_ID: ::clockid_t = 14;
-pub const CLOCK_PROCESS_CPUTIME_ID: ::clockid_t = 15;
 
 #[doc(hidden)]
 #[deprecated(
@@ -1043,6 +1041,7 @@ pub const HW_MAXID: ::c_int = 13;
 #[deprecated(since = "0.2.54", note = "Removed in FreeBSD 11")]
 pub const USER_MAXID: ::c_int = 21;
 #[doc(hidden)]
+#[deprecated(since = "0.2.74", note = "Removed in FreeBSD 13")]
 pub const CTL_P1003_1B_MAXID: ::c_int = 26;
 
 pub const MSG_NOTIFICATION: ::c_int = 0x00002000;
@@ -1141,6 +1140,15 @@ pub const UF_READONLY: ::c_ulong = 0x00001000;
 pub const UF_HIDDEN: ::c_ulong = 0x00008000;
 pub const SF_SNAPSHOT: ::c_ulong = 0x00200000;
 
+pub const F_OGETLK: ::c_int = 7;
+pub const F_OSETLK: ::c_int = 8;
+pub const F_OSETLKW: ::c_int = 9;
+pub const F_DUP2FD: ::c_int = 10;
+pub const F_SETLK_REMOTE: ::c_int = 14;
+pub const F_READAHEAD: ::c_int = 15;
+pub const F_RDAHEAD: ::c_int = 16;
+pub const F_DUP2FD_CLOEXEC: ::c_int = 18;
+
 fn _ALIGN(p: usize) -> usize {
     (p + _ALIGNBYTES) & !_ALIGNBYTES
 }
@@ -1198,13 +1206,6 @@ f! {
 
 extern "C" {
     pub fn __error() -> *mut ::c_int;
-
-    pub fn clock_getres(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
-    pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
-    pub fn clock_settime(
-        clk_id: ::clockid_t,
-        tp: *const ::timespec,
-    ) -> ::c_int;
 
     pub fn extattr_delete_fd(
         fd: ::c_int,

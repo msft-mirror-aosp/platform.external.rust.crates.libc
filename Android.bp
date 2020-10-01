@@ -3,6 +3,7 @@
 rust_defaults {
     name: "rust_libc_defaults",
     crate_name: "libc",
+    srcs: ["src/lib.rs"],
     test_suites: ["general-tests"],
     auto_gen_config: true,
     edition: "2015",
@@ -13,6 +14,7 @@ rust_defaults {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
@@ -24,18 +26,17 @@ rust_defaults {
 rust_test_host {
     name: "libc_host_test_src_lib",
     defaults: ["rust_libc_defaults"],
-    srcs: ["src/lib.rs"],
 }
 
 rust_test {
     name: "libc_device_test_src_lib",
     defaults: ["rust_libc_defaults"],
-    srcs: ["src/lib.rs"],
 }
 
 rust_defaults {
     name: "rust_libc_defaults_const_fn",
     crate_name: "const_fn",
+    srcs: ["tests/const_fn.rs"],
     test_suites: ["general-tests"],
     auto_gen_config: true,
     edition: "2015",
@@ -46,6 +47,7 @@ rust_defaults {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",
@@ -60,13 +62,11 @@ rust_defaults {
 rust_test_host {
     name: "libc_host_test_tests_const_fn",
     defaults: ["rust_libc_defaults_const_fn"],
-    srcs: ["tests/const_fn.rs"],
 }
 
 rust_test {
     name: "libc_device_test_tests_const_fn",
     defaults: ["rust_libc_defaults_const_fn"],
-    srcs: ["tests/const_fn.rs"],
 }
 
 rust_library {
@@ -82,6 +82,7 @@ rust_library {
     flags: [
         "--cfg freebsd11",
         "--cfg libc_align",
+        "--cfg libc_cfg_target_vendor",
         "--cfg libc_const_size_of",
         "--cfg libc_core_cvoid",
         "--cfg libc_packedN",

@@ -31,6 +31,14 @@ impl siginfo_t {
     pub unsafe fn si_value(&self) -> ::sigval {
         self.si_value
     }
+
+    pub unsafe fn si_pid(&self) -> ::pid_t {
+        self.si_pid
+    }
+
+    pub unsafe fn si_uid(&self) -> ::uid_t {
+        self.si_uid
+    }
 }
 
 s! {
@@ -217,6 +225,13 @@ s! {
         pub esterror: ::c_long,
         pub tai: ::c_long,
         pub time_state: ::c_int,
+    }
+
+    pub struct ptrace_io_desc {
+        pub piod_op: ::c_int,
+        pub piod_offs: *mut ::c_void,
+        pub piod_addr: *mut ::c_void,
+        pub piod_len: ::size_t,
     }
 }
 
@@ -623,6 +638,21 @@ pub const RLIM_INFINITY: rlim_t = 0x7fff_ffff_ffff_ffff;
 pub const RUSAGE_SELF: ::c_int = 0;
 pub const RUSAGE_CHILDREN: ::c_int = -1;
 
+pub const CLOCK_REALTIME: ::clockid_t = 0;
+pub const CLOCK_VIRTUAL: ::clockid_t = 1;
+pub const CLOCK_PROF: ::clockid_t = 2;
+pub const CLOCK_MONOTONIC: ::clockid_t = 4;
+pub const CLOCK_UPTIME: ::clockid_t = 5;
+pub const CLOCK_UPTIME_PRECISE: ::clockid_t = 7;
+pub const CLOCK_UPTIME_FAST: ::clockid_t = 8;
+pub const CLOCK_REALTIME_PRECISE: ::clockid_t = 9;
+pub const CLOCK_REALTIME_FAST: ::clockid_t = 10;
+pub const CLOCK_MONOTONIC_PRECISE: ::clockid_t = 11;
+pub const CLOCK_MONOTONIC_FAST: ::clockid_t = 12;
+pub const CLOCK_SECOND: ::clockid_t = 13;
+pub const CLOCK_THREAD_CPUTIME_ID: ::clockid_t = 14;
+pub const CLOCK_PROCESS_CPUTIME_ID: ::clockid_t = 15;
+
 pub const MADV_NORMAL: ::c_int = 0;
 pub const MADV_RANDOM: ::c_int = 1;
 pub const MADV_SEQUENTIAL: ::c_int = 2;
@@ -712,6 +742,11 @@ pub const PF_INET6: ::c_int = AF_INET6;
 pub const PF_NATM: ::c_int = AF_NATM;
 pub const PF_ATM: ::c_int = AF_ATM;
 pub const PF_NETGRAPH: ::c_int = AF_NETGRAPH;
+
+pub const PIOD_READ_D: ::c_int = 1;
+pub const PIOD_WRITE_D: ::c_int = 2;
+pub const PIOD_READ_I: ::c_int = 3;
+pub const PIOD_WRITE_I: ::c_int = 4;
 
 pub const PT_TRACE_ME: ::c_int = 0;
 pub const PT_READ_I: ::c_int = 1;
@@ -1222,6 +1257,18 @@ extern "C" {
         flags: ::c_ulong,
         atflag: ::c_int,
     ) -> ::c_int;
+
+    pub fn clock_getres(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
+    pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
+    pub fn clock_settime(
+        clk_id: ::clockid_t,
+        tp: *const ::timespec,
+    ) -> ::c_int;
+    pub fn clock_getcpuclockid(
+        pid: ::pid_t,
+        clk_id: *mut ::clockid_t,
+    ) -> ::c_int;
+
     pub fn dirfd(dirp: *mut ::DIR) -> ::c_int;
     pub fn duplocale(base: ::locale_t) -> ::locale_t;
     pub fn endutxent();

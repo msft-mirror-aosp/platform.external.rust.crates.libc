@@ -2041,6 +2041,8 @@ pub const SIOCSRARP: ::c_ulong = 0x00008962;
 pub const SIOCGIFMAP: ::c_ulong = 0x00008970;
 pub const SIOCSIFMAP: ::c_ulong = 0x00008971;
 
+pub const PTRACE_EVENT_STOP: ::c_int = 128;
+
 pub const IPTOS_TOS_MASK: u8 = 0x1E;
 pub const IPTOS_PREC_MASK: u8 = 0xE0;
 
@@ -2355,7 +2357,13 @@ pub const MAP_FIXED_NOREPLACE: ::c_int = 0x100000;
 // uapi/linux/vm_sockets.h
 pub const VMADDR_CID_ANY: ::c_uint = 0xFFFFFFFF;
 pub const VMADDR_CID_HYPERVISOR: ::c_uint = 0;
+#[deprecated(
+    since = "0.2.74",
+    note = "VMADDR_CID_RESERVED is removed since Linux v5.6 and \
+            replaced with VMADDR_CID_LOCAL"
+)]
 pub const VMADDR_CID_RESERVED: ::c_uint = 1;
+pub const VMADDR_CID_LOCAL: ::c_uint = 1;
 pub const VMADDR_CID_HOST: ::c_uint = 2;
 pub const VMADDR_PORT_ANY: ::c_uint = 0xFFFFFFFF;
 
