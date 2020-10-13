@@ -1,5 +1,5 @@
 name: "libc"
-description: "libc provides all of the definitions necessary to easily interoperate with C code (or \"C-like\" code) on each of the platforms that Rust supports. This includes type definitions (e.g. c_int), constants (e.g. EINVAL) as well as function headers (e.g. malloc).  This crate exports all underlying platform types, functions, and constants under the crate root, so all items are accessible as libc::foo. The types and values of all the exported APIs match the platform that libc is compiled for.  More detailed information about the design of this library can be found in its associated RFC."
+description: "Raw FFI bindings to platform libraries like libc."
 third_party {
   url {
     type: HOMEPAGE
