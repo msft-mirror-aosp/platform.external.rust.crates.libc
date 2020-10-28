@@ -306,6 +306,13 @@ s_no_extra_traits! {
         pub salg_name: [::c_uchar; 64],
     }
 
+    /// WARNING: The `PartialEq`, `Eq` and `Hash` implementations of this
+    /// type are unsound and will be removed in the future.
+    #[deprecated(
+        note = "this struct has unsafe trait implementations that will be \
+                removed in the future",
+        since = "0.2.80"
+    )]
     pub struct af_alg_iv {
         pub ivlen: u32,
         pub iv: [::c_uchar; 0],
@@ -591,6 +598,7 @@ cfg_if! {
             }
         }
 
+        #[allow(deprecated)]
         impl af_alg_iv {
             fn as_slice(&self) -> &[u8] {
                 unsafe {
@@ -602,22 +610,26 @@ cfg_if! {
             }
         }
 
+        #[allow(deprecated)]
         impl PartialEq for af_alg_iv {
             fn eq(&self, other: &af_alg_iv) -> bool {
                 *self.as_slice() == *other.as_slice()
            }
         }
 
+        #[allow(deprecated)]
         impl Eq for af_alg_iv {}
 
+        #[allow(deprecated)]
         impl ::fmt::Debug for af_alg_iv {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("af_alg_iv")
-                    .field("iv", &self.as_slice())
+                    .field("ivlen", &self.ivlen)
                     .finish()
             }
         }
 
+        #[allow(deprecated)]
         impl ::hash::Hash for af_alg_iv {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 self.as_slice().hash(state);
@@ -841,6 +853,11 @@ pub const _SC_V7_LPBIG_OFFBIG: ::c_int = 140;
 pub const _SC_XOPEN_STREAMS: ::c_int = 141;
 pub const _SC_XOPEN_UUCP: ::c_int = 142;
 
+pub const F_LOCK: ::c_int = 1;
+pub const F_TEST: ::c_int = 3;
+pub const F_TLOCK: ::c_int = 2;
+pub const F_ULOCK: ::c_int = 0;
+
 pub const PTHREAD_MUTEX_NORMAL: ::c_int = 0;
 pub const PTHREAD_MUTEX_RECURSIVE: ::c_int = 1;
 pub const PTHREAD_MUTEX_ERRORCHECK: ::c_int = 2;
@@ -1008,6 +1025,8 @@ pub const SOCK_SEQPACKET: ::c_int = 5;
 pub const SOCK_DCCP: ::c_int = 6;
 pub const SOCK_PACKET: ::c_int = 10;
 
+pub const IPPROTO_MAX: ::c_int = 256;
+
 pub const SOL_SOCKET: ::c_int = 1;
 pub const SOL_SCTP: ::c_int = 132;
 pub const SOL_IPX: ::c_int = 256;
@@ -1067,6 +1086,8 @@ pub const SO_DOMAIN: ::c_int = 39;
 pub const SO_RXQ_OVFL: ::c_int = 40;
 pub const SO_PEEK_OFF: ::c_int = 42;
 pub const SO_BUSY_POLL: ::c_int = 46;
+
+pub const TCP_ULP: ::c_int = 31;
 
 pub const IPTOS_ECN_NOTECT: u8 = 0x00;
 
@@ -1676,13 +1697,16 @@ pub const SFD_NONBLOCK: ::c_int = O_NONBLOCK;
 pub const SOCK_NONBLOCK: ::c_int = O_NONBLOCK;
 
 pub const SO_ORIGINAL_DST: ::c_int = 80;
-pub const IP_ORIGDSTADDR: ::c_int = 20;
-pub const IP_RECVORIGDSTADDR: ::c_int = IP_ORIGDSTADDR;
+
+pub const IP_RECVFRAGSIZE: ::c_int = 25;
+
 pub const IPV6_FLOWINFO: ::c_int = 11;
-pub const IPV6_ORIGDSTADDR: ::c_int = 74;
-pub const IPV6_RECVORIGDSTADDR: ::c_int = IPV6_ORIGDSTADDR;
+pub const IPV6_MULTICAST_ALL: ::c_int = 29;
+pub const IPV6_ROUTER_ALERT_ISOLATE: ::c_int = 30;
 pub const IPV6_FLOWLABEL_MGR: ::c_int = 32;
 pub const IPV6_FLOWINFO_SEND: ::c_int = 33;
+pub const IPV6_RECVFRAGSIZE: ::c_int = 77;
+pub const IPV6_FREEBIND: ::c_int = 78;
 pub const IPV6_FLOWINFO_FLOWLABEL: ::c_int = 0x000fffff;
 pub const IPV6_FLOWINFO_PRIORITY: ::c_int = 0x0ff00000;
 
@@ -2126,6 +2150,13 @@ pub const ALG_SET_AEAD_AUTHSIZE: ::c_int = 5;
 pub const ALG_OP_DECRYPT: ::c_int = 0;
 pub const ALG_OP_ENCRYPT: ::c_int = 1;
 
+// uapi/linux/vm_sockets.h
+pub const VMADDR_CID_ANY: ::c_uint = 0xFFFFFFFF;
+pub const VMADDR_CID_HYPERVISOR: ::c_uint = 0;
+pub const VMADDR_CID_LOCAL: ::c_uint = 1;
+pub const VMADDR_CID_HOST: ::c_uint = 2;
+pub const VMADDR_PORT_ANY: ::c_uint = 0xFFFFFFFF;
+
 // uapi/linux/inotify.h
 pub const IN_ACCESS: u32 = 0x0000_0001;
 pub const IN_MODIFY: u32 = 0x0000_0002;
@@ -2377,6 +2408,34 @@ extern "C" {
         sevlen: ::size_t,
         flags: ::c_int,
     ) -> ::c_int;
+    pub fn preadv(
+        fd: ::c_int,
+        iov: *const ::iovec,
+        count: ::c_int,
+        offset: ::off_t,
+    ) -> ::ssize_t;
+    pub fn pwritev(
+        fd: ::c_int,
+        iov: *const ::iovec,
+        count: ::c_int,
+        offset: ::off_t,
+    ) -> ::ssize_t;
+    pub fn process_vm_readv(
+        pid: ::pid_t,
+        local_iov: *const ::iovec,
+        local_iov_count: ::c_ulong,
+        remote_iov: *const ::iovec,
+        remote_iov_count: ::c_ulong,
+        flags: ::c_ulong,
+    ) -> ::ssize_t;
+    pub fn process_vm_writev(
+        pid: ::pid_t,
+        local_iov: *const ::iovec,
+        local_iov_count: ::c_ulong,
+        remote_iov: *const ::iovec,
+        remote_iov_count: ::c_ulong,
+        flags: ::c_ulong,
+    ) -> ::ssize_t;
     pub fn ptrace(request: ::c_int, ...) -> ::c_long;
     pub fn getpriority(which: ::c_int, who: ::id_t) -> ::c_int;
     pub fn setpriority(which: ::c_int, who: ::id_t, prio: ::c_int) -> ::c_int;
