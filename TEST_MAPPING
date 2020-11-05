@@ -2,18 +2,57 @@
 {
   "presubmit": [
     {
-      "name": "libc_host_test_src_lib",
-      "host": true
+      "host": true,
+      "name": "libc_host_test_src_lib"
     },
     {
       "name": "libc_device_test_src_lib"
     },
     {
-      "name": "libc_host_test_tests_const_fn",
-      "host": true
+      "host": true,
+      "name": "libc_host_test_tests_const_fn"
     },
     {
       "name": "libc_device_test_tests_const_fn"
+    },
+    {
+      "host": true,
+      "name": "libz-sys_host_test_src_lib"
+    },
+    {
+      "name": "libz-sys_device_test_src_lib"
+    },
+    {
+      "host": true,
+      "name": "rand_core_host_test_src_lib"
+    },
+    {
+      "name": "rand_core_device_test_src_lib"
+    },
+    {
+      "host": true,
+      "name": "getrandom_host_test_src_lib"
+    },
+    {
+      "name": "getrandom_device_test_src_lib"
+    },
+    {
+      "host": true,
+      "name": "parking_lot_core_host_test_src_lib"
+    },
+    {
+      "name": "parking_lot_core_device_test_src_lib"
+    },
+    {
+      "host": true,
+      "name": "tokio-macros_host_test_src_lib"
+    },
+    {
+      "host": true,
+      "name": "libsqlite3-sys_host_test_src_lib"
+    },
+    {
+      "name": "libsqlite3-sys_device_test_src_lib"
     }
   ]
 }
