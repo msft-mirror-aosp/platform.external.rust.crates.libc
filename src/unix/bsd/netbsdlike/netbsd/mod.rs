@@ -919,6 +919,12 @@ pub const O_RSYNC: ::c_int = 0x00020000;
 pub const MS_SYNC: ::c_int = 0x4;
 pub const MS_INVALIDATE: ::c_int = 0x2;
 
+// Here because they are not present on OpenBSD
+// (https://github.com/openbsd/src/blob/master/sys/sys/resource.h)
+pub const RLIMIT_SBSIZE: ::c_int = 9;
+pub const RLIMIT_AS: ::c_int = 10;
+pub const RLIMIT_NTHR: ::c_int = 11;
+
 #[deprecated(since = "0.2.64", note = "Not stable across OS versions")]
 pub const RLIM_NLIMITS: ::c_int = 12;
 
@@ -1699,27 +1705,11 @@ f! {
             as ::c_uint
     }
 
-    pub fn WSTOPSIG(status: ::c_int) -> ::c_int {
-        status >> 8
-    }
-
-    pub fn WIFSIGNALED(status: ::c_int) -> bool {
-        (status & 0o177) != 0o177 && (status & 0o177) != 0
-    }
-
-    pub fn WIFSTOPPED(status: ::c_int) -> bool {
-        (status & 0o177) == 0o177
-    }
-
     // dirfd() is a macro on netbsd to access
     // the first field of the struct where dirp points to:
     // http://cvsweb.netbsd.org/bsdweb.cgi/src/include/dirent.h?rev=1.36
     pub fn dirfd(dirp: *mut ::DIR) -> ::c_int {
         *(dirp as *const ::c_int)
-    }
-
-    pub fn WIFCONTINUED(status: ::c_int) -> bool {
-        status == 0xffff
     }
 
     pub fn SOCKCREDSIZE(ngrps: usize) -> usize {
@@ -1732,9 +1722,33 @@ f! {
     }
 }
 
+safe_f! {
+    pub {const} fn WSTOPSIG(status: ::c_int) -> ::c_int {
+        status >> 8
+    }
+
+    pub {const} fn WIFSIGNALED(status: ::c_int) -> bool {
+        (status & 0o177) != 0o177 && (status & 0o177) != 0
+    }
+
+    pub {const} fn WIFSTOPPED(status: ::c_int) -> bool {
+        (status & 0o177) == 0o177
+    }
+
+    pub {const} fn WIFCONTINUED(status: ::c_int) -> bool {
+        status == 0xffff
+    }
+}
+
 extern "C" {
     pub fn ntp_adjtime(buf: *mut timex) -> ::c_int;
     pub fn ntp_gettime(buf: *mut ntptimeval) -> ::c_int;
+    pub fn clock_nanosleep(
+        clk_id: ::clockid_t,
+        flags: ::c_int,
+        rqtp: *const ::timespec,
+        rmtp: *mut ::timespec,
+    ) -> ::c_int;
 }
 
 #[link(name = "rt")]

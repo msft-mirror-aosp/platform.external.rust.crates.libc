@@ -1406,6 +1406,7 @@ pub const O_DSYNC: ::c_int = 0x400000;
 pub const O_NOCTTY: ::c_int = 0x20000;
 pub const O_CLOEXEC: ::c_int = 0x1000000;
 pub const O_DIRECTORY: ::c_int = 0x100000;
+pub const O_SYMLINK: ::c_int = 0x200000;
 pub const S_IFIFO: mode_t = 4096;
 pub const S_IFCHR: mode_t = 8192;
 pub const S_IFBLK: mode_t = 24576;
@@ -3240,24 +3241,26 @@ f! {
         (__DARWIN_ALIGN32(::mem::size_of::<::cmsghdr>()) + length as usize)
             as ::c_uint
     }
+}
 
-    pub fn WSTOPSIG(status: ::c_int) -> ::c_int {
+safe_f! {
+    pub {const} fn WSTOPSIG(status: ::c_int) -> ::c_int {
         status >> 8
     }
 
-    pub fn _WSTATUS(status: ::c_int) -> ::c_int {
+    pub {const} fn _WSTATUS(status: ::c_int) -> ::c_int {
         status & 0x7f
     }
 
-    pub fn WIFCONTINUED(status: ::c_int) -> bool {
+    pub {const} fn WIFCONTINUED(status: ::c_int) -> bool {
         _WSTATUS(status) == _WSTOPPED && WSTOPSIG(status) == 0x13
     }
 
-    pub fn WIFSIGNALED(status: ::c_int) -> bool {
+    pub {const} fn WIFSIGNALED(status: ::c_int) -> bool {
         _WSTATUS(status) != _WSTOPPED && _WSTATUS(status) != 0
     }
 
-    pub fn WIFSTOPPED(status: ::c_int) -> bool {
+    pub {const} fn WIFSTOPPED(status: ::c_int) -> bool {
         _WSTATUS(status) == _WSTOPPED && WSTOPSIG(status) != 0x13
     }
 }

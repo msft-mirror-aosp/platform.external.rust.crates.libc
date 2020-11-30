@@ -1557,6 +1557,8 @@ pub const SOCK_STREAM: ::c_int = 1;
 pub const SOCK_DGRAM: ::c_int = 2;
 pub const SOCK_SEQPACKET: ::c_int = 5;
 
+pub const IPPROTO_MAX: ::c_int = 256;
+
 pub const SOL_SOCKET: ::c_int = 1;
 
 pub const SO_REUSEADDR: ::c_int = 2;
@@ -1575,6 +1577,9 @@ pub const SO_SNDLOWAT: ::c_int = 19;
 pub const SO_RCVTIMEO: ::c_int = 20;
 pub const SO_SNDTIMEO: ::c_int = 21;
 pub const SO_ACCEPTCONN: ::c_int = 30;
+
+pub const IPV6_RTHDR_LOOSE: ::c_int = 0;
+pub const IPV6_RTHDR_STRICT: ::c_int = 1;
 
 pub const SA_ONSTACK: ::c_int = 0x08000000;
 pub const SA_SIGINFO: ::c_int = 0x00000004;
