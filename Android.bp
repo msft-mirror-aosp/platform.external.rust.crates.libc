@@ -92,4 +92,8 @@ rust_library {
         "--cfg libc_priv_mod_use",
         "--cfg libc_union",
     ],
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
 }
