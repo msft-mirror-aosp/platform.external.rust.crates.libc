@@ -27,6 +27,9 @@ rust_defaults {
 rust_test_host {
     name: "libc_host_test_src_lib",
     defaults: ["rust_libc_defaults"],
+    test_options: {
+        unit_test: true,
+    },
 }
 
 rust_test {
@@ -64,6 +67,9 @@ rust_defaults {
 rust_test_host {
     name: "libc_host_test_tests_const_fn",
     defaults: ["rust_libc_defaults_const_fn"],
+    test_options: {
+        unit_test: true,
+    },
 }
 
 rust_test {
