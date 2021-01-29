@@ -984,6 +984,7 @@ pub const IP_RECVORIGDSTADDR: ::c_int = IP_ORIGDSTADDR;
 
 pub const IP_RECVTOS: ::c_int = 68;
 
+pub const IPV6_BINDANY: ::c_int = 64;
 pub const IPV6_ORIGDSTADDR: ::c_int = 72;
 pub const IPV6_RECVORIGDSTADDR: ::c_int = IPV6_ORIGDSTADDR;
 
@@ -1195,12 +1196,14 @@ f! {
         ::mem::size_of::<sockcred>() + ::mem::size_of::<::gid_t>() * ngrps
     }
 
-    pub fn WIFSIGNALED(status: ::c_int) -> bool {
-        (status & 0o177) != 0o177 && (status & 0o177) != 0 && status != 0x13
-    }
-
     pub fn uname(buf: *mut ::utsname) -> ::c_int {
         __xuname(256, buf as *mut ::c_void)
+    }
+}
+
+safe_f! {
+    pub {const} fn WIFSIGNALED(status: ::c_int) -> bool {
+        (status & 0o177) != 0o177 && (status & 0o177) != 0 && status != 0x13
     }
 }
 
@@ -1297,7 +1300,6 @@ extern "C" {
         flags: ::c_int,
     ) -> ::c_int;
 
-    pub fn fdatasync(fd: ::c_int) -> ::c_int;
     pub fn posix_fallocate(
         fd: ::c_int,
         offset: ::off_t,
@@ -1497,6 +1499,12 @@ extern "C" {
         needle: *const ::c_void,
         needlelen: ::size_t,
     ) -> *mut ::c_void;
+
+    pub fn nmount(
+        iov: *mut ::iovec,
+        niov: ::c_uint,
+        flags: ::c_int,
+    ) -> ::c_int;
 }
 
 #[link(name = "util")]

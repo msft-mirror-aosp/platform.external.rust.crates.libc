@@ -298,6 +298,32 @@ cfg_if! {
     } else if #[cfg(feature = "std")] {
         // cargo build, don't pull in anything extra as the libstd dep
         // already pulls in all libs.
+    } else if #[cfg(all(target_os = "linux",
+                        target_env = "gnu",
+                        feature = "rustc-dep-of-std"))] {
+        #[link(name = "util", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "rt", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "pthread", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "m", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "dl", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "c", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "gcc_eh", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "gcc", kind = "static-nobundle",
+            cfg(target_feature = "crt-static"))]
+        #[link(name = "util", cfg(not(target_feature = "crt-static")))]
+        #[link(name = "rt", cfg(not(target_feature = "crt-static")))]
+        #[link(name = "pthread", cfg(not(target_feature = "crt-static")))]
+        #[link(name = "m", cfg(not(target_feature = "crt-static")))]
+        #[link(name = "dl", cfg(not(target_feature = "crt-static")))]
+        #[link(name = "c", cfg(not(target_feature = "crt-static")))]
+        extern {}
     } else if #[cfg(target_env = "musl")] {
         #[cfg_attr(feature = "rustc-dep-of-std",
                    link(name = "c", kind = "static",
@@ -482,6 +508,7 @@ extern "C" {
     pub fn fsetpos(stream: *mut FILE, ptr: *const fpos_t) -> c_int;
     pub fn feof(stream: *mut FILE) -> c_int;
     pub fn ferror(stream: *mut FILE) -> c_int;
+    pub fn clearerr(stream: *mut FILE);
     pub fn perror(s: *const c_char);
     pub fn atoi(s: *const c_char) -> c_int;
     #[cfg_attr(
@@ -1288,23 +1315,33 @@ extern "C" {
     pub fn res_init() -> ::c_int;
 
     #[cfg_attr(target_os = "netbsd", link_name = "__gmtime_r50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn gmtime_r(time_p: *const time_t, result: *mut tm) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__localtime_r50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn localtime_r(time_p: *const time_t, result: *mut tm) -> *mut tm;
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "mktime$UNIX2003"
     )]
     #[cfg_attr(target_os = "netbsd", link_name = "__mktime50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn mktime(tm: *mut tm) -> time_t;
     #[cfg_attr(target_os = "netbsd", link_name = "__time50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn time(time: *mut time_t) -> time_t;
     #[cfg_attr(target_os = "netbsd", link_name = "__gmtime50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn gmtime(time_p: *const time_t) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__locatime50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn localtime(time_p: *const time_t) -> *mut tm;
     #[cfg_attr(target_os = "netbsd", link_name = "__difftime50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
     pub fn difftime(time1: time_t, time0: time_t) -> ::c_double;
+    #[cfg_attr(target_os = "netbsd", link_name = "__timegm50")]
+    #[cfg_attr(target_env = "musl", allow(deprecated))] // FIXME: for `time_t`
+    pub fn timegm(tm: *mut ::tm) -> time_t;
 
     #[cfg_attr(target_os = "netbsd", link_name = "__mknod50")]
     #[cfg_attr(
@@ -1317,10 +1354,17 @@ extern "C" {
         dev: ::dev_t,
     ) -> ::c_int;
     pub fn gethostname(name: *mut ::c_char, len: ::size_t) -> ::c_int;
+    pub fn endservent();
     pub fn getservbyname(
         name: *const ::c_char,
         proto: *const ::c_char,
     ) -> *mut servent;
+    pub fn getservbyport(
+        port: ::c_int,
+        proto: *const ::c_char,
+    ) -> *mut servent;
+    pub fn getservent() -> *mut servent;
+    pub fn setservent(stayopen: ::c_int);
     pub fn getprotobyname(name: *const ::c_char) -> *mut protoent;
     pub fn getprotobynumber(proto: ::c_int) -> *mut protoent;
     pub fn chroot(name: *const ::c_char) -> ::c_int;
@@ -1418,9 +1462,6 @@ extern "C" {
     ) -> ::c_int;
     #[cfg_attr(target_os = "netbsd", link_name = "__sigpending14")]
     pub fn sigpending(set: *mut sigset_t) -> ::c_int;
-
-    #[cfg_attr(target_os = "netbsd", link_name = "__timegm50")]
-    pub fn timegm(tm: *mut ::tm) -> time_t;
 
     pub fn sysconf(name: ::c_int) -> ::c_long;
 
@@ -1534,9 +1575,10 @@ cfg_if! {
                 all(target_os = "freebsd", any(freebsd11, freebsd10)),
                 link_name = "readdir_r@FBSD_1.0"
             )]
-            /// The 64-bit libc on Solaris and illumos only has readdir_r.  If a
+            #[allow(non_autolinks)] // FIXME: `<>` breaks line length limit.
+            /// The 64-bit libc on Solaris and illumos only has readdir_r. If a
             /// 32-bit Solaris or illumos target is ever created, it should use
-            /// __posix_readdir_r.  See libc(3LIB) on Solaris or illumos:
+            /// __posix_readdir_r. See libc(3LIB) on Solaris or illumos:
             /// https://illumos.org/man/3lib/libc
             /// https://docs.oracle.com/cd/E36784_01/html/E36873/libc-3lib.html
             /// https://www.unix.com/man-page/opensolaris/3LIB/libc/

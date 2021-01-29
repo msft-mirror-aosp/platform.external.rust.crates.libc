@@ -1385,8 +1385,25 @@ pub const IP_DROP_MEMBERSHIP: ::c_int = 20;
 pub const IPV6_JOIN_GROUP: ::c_int = 9;
 pub const IPV6_LEAVE_GROUP: ::c_int = 10;
 
-pub const TCP_NODELAY: ::c_int = 1;
-pub const TCP_KEEPIDLE: ::c_int = 34;
+// These TCP socket options are common between illumos and Solaris, while higher
+// numbers have generally diverged:
+pub const TCP_NODELAY: ::c_int = 0x1;
+pub const TCP_MAXSEG: ::c_int = 0x2;
+pub const TCP_KEEPALIVE: ::c_int = 0x8;
+pub const TCP_NOTIFY_THRESHOLD: ::c_int = 0x10;
+pub const TCP_ABORT_THRESHOLD: ::c_int = 0x11;
+pub const TCP_CONN_NOTIFY_THRESHOLD: ::c_int = 0x12;
+pub const TCP_CONN_ABORT_THRESHOLD: ::c_int = 0x13;
+pub const TCP_RECVDSTADDR: ::c_int = 0x14;
+pub const TCP_INIT_CWND: ::c_int = 0x15;
+pub const TCP_KEEPALIVE_THRESHOLD: ::c_int = 0x16;
+pub const TCP_KEEPALIVE_ABORT_THRESHOLD: ::c_int = 0x17;
+pub const TCP_CORK: ::c_int = 0x18;
+pub const TCP_RTO_INITIAL: ::c_int = 0x19;
+pub const TCP_RTO_MIN: ::c_int = 0x1a;
+pub const TCP_RTO_MAX: ::c_int = 0x1b;
+pub const TCP_LINGER2: ::c_int = 0x1c;
+
 pub const SOL_SOCKET: ::c_int = 0xffff;
 pub const SO_DEBUG: ::c_int = 0x01;
 pub const SO_ACCEPTCONN: ::c_int = 0x0002;
@@ -2130,36 +2147,38 @@ f! {
             *slot = 0;
         }
     }
+}
 
-    pub fn WIFEXITED(status: ::c_int) -> bool {
+safe_f! {
+    pub {const} fn WIFEXITED(status: ::c_int) -> bool {
         (status & 0xFF) == 0
     }
 
-    pub fn WEXITSTATUS(status: ::c_int) -> ::c_int {
+    pub {const} fn WEXITSTATUS(status: ::c_int) -> ::c_int {
         (status >> 8) & 0xFF
     }
 
-    pub fn WTERMSIG(status: ::c_int) -> ::c_int {
+    pub {const} fn WTERMSIG(status: ::c_int) -> ::c_int {
         status & 0x7F
     }
 
-    pub fn WIFCONTINUED(status: ::c_int) -> bool {
+    pub {const} fn WIFCONTINUED(status: ::c_int) -> bool {
         (status & 0xffff) == 0xffff
     }
 
-    pub fn WSTOPSIG(status: ::c_int) -> ::c_int {
+    pub {const} fn WSTOPSIG(status: ::c_int) -> ::c_int {
         (status & 0xff00) >> 8
     }
 
-    pub fn WIFSIGNALED(status: ::c_int) -> bool {
+    pub {const} fn WIFSIGNALED(status: ::c_int) -> bool {
         ((status & 0xff) > 0) && (status & 0xff00 == 0)
     }
 
-    pub fn WIFSTOPPED(status: ::c_int) -> bool {
+    pub {const} fn WIFSTOPPED(status: ::c_int) -> bool {
         ((status & 0xff) == 0x7f) && ((status & 0xff00) != 0)
     }
 
-    pub fn WCOREDUMP(status: ::c_int) -> bool {
+    pub {const} fn WCOREDUMP(status: ::c_int) -> bool {
         (status & 0x80) != 0
     }
 }
@@ -2265,10 +2284,6 @@ extern "C" {
         attr: *const ::pthread_attr_t,
         f: extern "C" fn(*mut ::c_void) -> *mut ::c_void,
         value: *mut ::c_void,
-    ) -> ::c_int;
-    pub fn pthread_getattr_np(
-        thread: ::pthread_t,
-        attr: *mut ::pthread_attr_t,
     ) -> ::c_int;
     pub fn pthread_attr_getstack(
         attr: *const ::pthread_attr_t,
@@ -2415,7 +2430,7 @@ extern "C" {
         fd: ::c_int,
         address: *mut sockaddr,
         address_len: *mut socklen_t,
-        flags: ::c_int
+        flags: ::c_int,
     ) -> ::c_int;
 
     pub fn mq_open(name: *const ::c_char, oflag: ::c_int, ...) -> ::mqd_t;
@@ -2659,7 +2674,8 @@ extern "C" {
     pub fn ucred_getpid(ucred: *const ucred_t) -> ::pid_t;
     pub fn ucred_getprojid(ucred: *const ucred_t) -> projid_t;
     pub fn ucred_getzoneid(ucred: *const ucred_t) -> zoneid_t;
-    pub fn ucred_getpflags(ucred: *const ucred_t, flags: ::c_uint) -> ::c_uint;
+    pub fn ucred_getpflags(ucred: *const ucred_t, flags: ::c_uint)
+        -> ::c_uint;
 
     pub fn ucred_size() -> ::size_t;
 }
