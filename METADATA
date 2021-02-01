@@ -7,13 +7,13 @@ third_party {
   }
   url {
     type: ARCHIVE
-    value: "https://static.crates.io/crates/libc/libc-0.2.80.crate"
+    value: "https://static.crates.io/crates/libc/libc-0.2.81.crate"
   }
-  version: "0.2.80"
+  version: "0.2.81"
   license_type: NOTICE
   last_upgrade_date {
     year: 2020
-    month: 10
-    day: 26
+    month: 12
+    day: 7
   }
 }
