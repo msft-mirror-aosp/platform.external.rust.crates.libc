@@ -55,9 +55,6 @@
       "name": "keystore2_test"
     },
     {
-      "name": "getrandom_device_test_tests_common"
-    },
-    {
       "name": "ring_device_test_tests_ed25519_tests"
     },
     {
