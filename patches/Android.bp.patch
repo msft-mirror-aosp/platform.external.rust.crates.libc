@@ -1,10 +1,8 @@
 --- Android.bp	2020-12-14 23:34:21.725521979 +0900
 +++ Android.bp.new	2020-12-14 23:30:18.808503638 +0900
- rust_defaults {
-     name: "rust_libc_defaults",
-@@ -92,4 +92,10 @@ rust_library {
-         "--cfg libc_priv_mod_use",
-         "--cfg libc_union",
+@@ -135,4 +135,10 @@ rust_library {
+         "libc_priv_mod_use",
+         "libc_union",
      ],
 +    apex_available: [
 +        "//apex_available:platform",
