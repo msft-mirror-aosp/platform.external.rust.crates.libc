@@ -26,6 +26,19 @@ pub type loff_t = ::c_longlong;
 pub type __kernel_loff_t = ::c_longlong;
 pub type __kernel_pid_t = ::c_int;
 
+// linux/elf.h
+
+pub type Elf32_Addr = u32;
+pub type Elf32_Half = u16;
+pub type Elf32_Off = u32;
+pub type Elf32_Word = u32;
+
+pub type Elf64_Addr = u64;
+pub type Elf64_Half = u16;
+pub type Elf64_Off = u64;
+pub type Elf64_Word = u32;
+pub type Elf64_Xword = u64;
+
 s! {
     pub struct stack_t {
         pub ss_sp: *mut ::c_void,
@@ -243,6 +256,57 @@ s! {
         pub svm_port: ::c_uint,
         pub svm_cid: ::c_uint,
         pub svm_zero: [u8; 4]
+    }
+
+    // linux/elf.h
+
+    pub struct Elf32_Phdr {
+        pub p_type: Elf32_Word,
+        pub p_offset: Elf32_Off,
+        pub p_vaddr: Elf32_Addr,
+        pub p_paddr: Elf32_Addr,
+        pub p_filesz: Elf32_Word,
+        pub p_memsz: Elf32_Word,
+        pub p_flags: Elf32_Word,
+        pub p_align: Elf32_Word,
+    }
+
+    pub struct Elf64_Phdr {
+        pub p_type: Elf64_Word,
+        pub p_flags: Elf64_Word,
+        pub p_offset: Elf64_Off,
+        pub p_vaddr: Elf64_Addr,
+        pub p_paddr: Elf64_Addr,
+        pub p_filesz: Elf64_Xword,
+        pub p_memsz: Elf64_Xword,
+        pub p_align: Elf64_Xword,
+    }
+
+    // link.h
+
+    pub struct dl_phdr_info {
+        #[cfg(target_pointer_width = "64")]
+        pub dlpi_addr: Elf64_Addr,
+        #[cfg(target_pointer_width = "32")]
+        pub dlpi_addr: Elf32_Addr,
+
+        pub dlpi_name: *const ::c_char,
+
+        #[cfg(target_pointer_width = "64")]
+        pub dlpi_phdr: *const Elf64_Phdr,
+        #[cfg(target_pointer_width = "32")]
+        pub dlpi_phdr: *const Elf32_Phdr,
+
+        #[cfg(target_pointer_width = "64")]
+        pub dlpi_phnum: Elf64_Half,
+        #[cfg(target_pointer_width = "32")]
+        pub dlpi_phnum: Elf32_Half,
+
+        // These fields were added in Android R
+        pub dlpi_adds: ::c_ulonglong,
+        pub dlpi_subs: ::c_ulonglong,
+        pub dlpi_tls_modid: ::size_t,
+        pub dlpi_tls_data: *mut ::c_void,
     }
 }
 
@@ -1089,8 +1153,6 @@ pub const SO_RXQ_OVFL: ::c_int = 40;
 pub const SO_PEEK_OFF: ::c_int = 42;
 pub const SO_BUSY_POLL: ::c_int = 46;
 
-pub const TCP_ULP: ::c_int = 31;
-
 pub const IPTOS_ECN_NOTECT: u8 = 0x00;
 
 pub const O_ACCMODE: ::c_int = 3;
@@ -1205,6 +1267,7 @@ pub const RLIMIT_MSGQUEUE: ::c_int = 12;
 pub const RLIMIT_NICE: ::c_int = 13;
 pub const RLIMIT_RTPRIO: ::c_int = 14;
 
+pub const RLIM_NLIMITS: ::c_int = 16;
 pub const RLIM_INFINITY: ::rlim_t = !0;
 
 pub const TCGETS: ::c_int = 0x5401;
@@ -2289,6 +2352,9 @@ pub const PF_VSOCK: ::c_int = AF_VSOCK;
 pub const PR_GET_SECUREBITS: ::c_int = 27;
 pub const PR_SET_SECUREBITS: ::c_int = 28;
 
+// sys/system_properties.h
+pub const PROP_VALUE_MAX: ::c_int = 92;
+
 f! {
     pub fn CMSG_NXTHDR(mhdr: *const msghdr,
                        cmsg: *const cmsghdr) -> *mut cmsghdr {
@@ -2717,6 +2783,22 @@ extern "C" {
     pub fn getrandom(buf: *mut ::c_void, buflen: ::size_t, flags: ::c_uint) -> ::ssize_t;
 
     pub fn pthread_setname_np(thread: ::pthread_t, name: *const ::c_char) -> ::c_int;
+
+    pub fn __system_property_set(__name: *const ::c_char, __value: *const ::c_char) -> ::c_int;
+    pub fn __system_property_get(__name: *const ::c_char, __value: *mut ::c_char) -> ::c_int;
+
+    // #include <link.h>
+    /// Only available in API Version 21+
+    pub fn dl_iterate_phdr(
+        callback: ::Option<
+            unsafe extern "C" fn(
+                info: *mut dl_phdr_info,
+                size: usize,
+                data: *mut ::c_void,
+            ) -> ::c_int,
+        >,
+        data: *mut ::c_void,
+    ) -> ::c_int;
 }
 
 cfg_if! {
