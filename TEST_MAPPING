@@ -2,9 +2,6 @@
 {
   "presubmit": [
     {
-      "name": "ZipFuseTest"
-    },
-    {
       "name": "anyhow_device_test_src_lib"
     },
     {
@@ -39,12 +36,6 @@
     },
     {
       "name": "anyhow_device_test_tests_test_source"
-    },
-    {
-      "name": "apkdmverity.test"
-    },
-    {
-      "name": "authfs_device_test_src_lib"
     },
     {
       "name": "crossbeam-epoch_device_test_src_lib"
@@ -117,9 +108,6 @@
     },
     {
       "name": "libz-sys_device_test_src_lib"
-    },
-    {
-      "name": "microdroid_manager_test"
     },
     {
       "name": "parking_lot_core_device_test_src_lib"
@@ -403,6 +391,12 @@
     },
     {
       "name": "tokio_device_test_tests_uds_split"
+    },
+    {
+      "name": "unicode-xid_device_test_src_lib"
+    },
+    {
+      "name": "unicode-xid_device_test_tests_exhaustive_tests"
     },
     {
       "name": "vpnprofilestore_test"
