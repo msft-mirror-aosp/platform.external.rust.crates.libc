@@ -38,7 +38,7 @@ license {
 }
 
 rust_defaults {
-    name: "rust_libc_defaults",
+    name: "rust_libc_test_defaults",
     crate_name: "libc",
     srcs: ["src/lib.rs"],
     test_suites: ["general-tests"],
@@ -63,7 +63,7 @@ rust_defaults {
 
 rust_test_host {
     name: "libc_host_test_src_lib",
-    defaults: ["rust_libc_defaults"],
+    defaults: ["rust_libc_test_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -71,11 +71,11 @@ rust_test_host {
 
 rust_test {
     name: "libc_device_test_src_lib",
-    defaults: ["rust_libc_defaults"],
+    defaults: ["rust_libc_test_defaults"],
 }
 
 rust_defaults {
-    name: "rust_libc_defaults_const_fn",
+    name: "rust_libc_test_defaults_const_fn",
     crate_name: "const_fn",
     srcs: ["tests/const_fn.rs"],
     test_suites: ["general-tests"],
@@ -103,7 +103,7 @@ rust_defaults {
 
 rust_test_host {
     name: "libc_host_test_tests_const_fn",
-    defaults: ["rust_libc_defaults_const_fn"],
+    defaults: ["rust_libc_test_defaults_const_fn"],
     test_options: {
         unit_test: true,
     },
@@ -111,7 +111,7 @@ rust_test_host {
 
 rust_test {
     name: "libc_device_test_tests_const_fn",
-    defaults: ["rust_libc_defaults_const_fn"],
+    defaults: ["rust_libc_test_defaults_const_fn"],
 }
 
 rust_library {
