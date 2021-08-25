@@ -2,6 +2,9 @@
 {
   "presubmit": [
     {
+      "name": "ZipFuseTest"
+    },
+    {
       "name": "anyhow_device_test_src_lib"
     },
     {
@@ -36,6 +39,21 @@
     },
     {
       "name": "anyhow_device_test_tests_test_source"
+    },
+    {
+      "name": "apkdmverity.test"
+    },
+    {
+      "name": "authfs_device_test_src_lib"
+    },
+    {
+      "name": "base64_device_test_tests_decode"
+    },
+    {
+      "name": "base64_device_test_tests_encode"
+    },
+    {
+      "name": "base64_device_test_tests_helpers"
     },
     {
       "name": "crossbeam-epoch_device_test_src_lib"
@@ -95,6 +113,15 @@
       "name": "keystore2_test"
     },
     {
+      "name": "legacykeystore_test"
+    },
+    {
+      "name": "libapkverify.integration_test"
+    },
+    {
+      "name": "libapkverify.test"
+    },
+    {
       "name": "libbinder_rs-internal_test"
     },
     {
@@ -104,10 +131,16 @@
       "name": "libc_device_test_tests_const_fn"
     },
     {
+      "name": "libidsig.test"
+    },
+    {
       "name": "libsqlite3-sys_device_test_src_lib"
     },
     {
       "name": "libz-sys_device_test_src_lib"
+    },
+    {
+      "name": "microdroid_manager_test"
     },
     {
       "name": "parking_lot_core_device_test_src_lib"
@@ -399,7 +432,16 @@
       "name": "unicode-xid_device_test_tests_exhaustive_tests"
     },
     {
-      "name": "legacykeystore_test"
+      "name": "virtualizationservice_device_test"
+    },
+    {
+      "name": "webpki_device_test_src_lib"
+    },
+    {
+      "name": "webpki_device_test_tests_dns_name_tests"
+    },
+    {
+      "name": "webpki_device_test_tests_integration"
     }
   ]
 }
