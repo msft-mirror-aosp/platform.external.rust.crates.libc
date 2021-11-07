@@ -2437,6 +2437,8 @@ pub const PF_NFC: ::c_int = AF_NFC;
 pub const PF_VSOCK: ::c_int = AF_VSOCK;
 
 // sys/prctl.h
+pub const PR_SET_PDEATHSIG: ::c_int = 1;
+pub const PR_GET_PDEATHSIG: ::c_int = 2;
 pub const PR_GET_SECUREBITS: ::c_int = 27;
 pub const PR_SET_SECUREBITS: ::c_int = 28;
 
