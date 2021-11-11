@@ -145,6 +145,7 @@ rust_library {
         "//apex_available:platform",
         "com.android.compos",
         "com.android.resolv",
+        "com.android.uwb",
         "com.android.virt",
     ],
     min_sdk_version: "29",
