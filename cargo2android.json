@@ -3,12 +3,14 @@
     "//apex_available:platform",
     "com.android.compos",
     "com.android.resolv",
+    "com.android.uwb",
     "com.android.virt"
   ],
   "dependencies": true,
   "device": true,
   "features": "default,extra_traits,std",
   "min-sdk-version": "29",
+  "vendor_available": true,
   "run": true,
   "tests": true
 }
