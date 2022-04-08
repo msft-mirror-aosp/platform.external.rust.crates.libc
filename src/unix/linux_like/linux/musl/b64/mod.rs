@@ -1,6 +1,5 @@
 pub type c_long = i64;
 pub type c_ulong = u64;
-pub type regoff_t = ::c_long;
 
 s! {
     pub struct statfs64 {
@@ -144,7 +143,11 @@ pub const SOCK_NONBLOCK: ::c_int = 2048;
 pub const SOCK_SEQPACKET: ::c_int = 5;
 
 extern "C" {
-    pub fn getrandom(buf: *mut ::c_void, buflen: ::size_t, flags: ::c_uint) -> ::ssize_t;
+    pub fn getrandom(
+        buf: *mut ::c_void,
+        buflen: ::size_t,
+        flags: ::c_uint,
+    ) -> ::ssize_t;
 }
 
 cfg_if! {
@@ -157,9 +160,6 @@ cfg_if! {
     } else if #[cfg(any(target_arch = "powerpc64"))] {
         mod powerpc64;
         pub use self::powerpc64::*;
-    } else if #[cfg(any(target_arch = "s390x"))] {
-        mod s390x;
-        pub use self::s390x::*;
     } else if #[cfg(any(target_arch = "x86_64"))] {
         mod x86_64;
         pub use self::x86_64::*;

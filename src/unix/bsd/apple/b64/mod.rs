@@ -2,6 +2,7 @@
 
 pub type c_long = i64;
 pub type c_ulong = u64;
+pub type boolean_t = ::c_uint;
 
 s! {
     pub struct timeval32 {
@@ -112,13 +113,8 @@ extern "C" {
 }
 
 cfg_if! {
-    if #[cfg(target_arch = "x86_64")] {
-        mod x86_64;
-        pub use self::x86_64::*;
-    } else if #[cfg(target_arch = "aarch64")] {
-        mod aarch64;
-        pub use self::aarch64::*;
-    } else {
-        // Unknown target_arch
+    if #[cfg(libc_align)] {
+        mod align;
+        pub use self::align::*;
     }
 }

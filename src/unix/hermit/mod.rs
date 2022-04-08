@@ -1,3 +1,13 @@
+// Copyright 2018 The Rust Project Developers. See the COPYRIGHT
+// file at the top-level directory of this distribution and at
+// http://rust-lang.org/COPYRIGHT.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 // liblibc port for HermitCore (https://hermitcore.org)
 // HermitCore is a unikernel based on lwIP, newlib, and
 // pthread-embedded.
@@ -939,20 +949,16 @@ const ULONG_SIZE: usize = 64;
 
 pub const WNOHANG: ::c_int = 0x00000001;
 
-pub const PRIO_PROCESS: ::c_int = 0;
-pub const PRIO_PGRP: ::c_int = 1;
-pub const PRIO_USER: ::c_int = 2;
-
-safe_f! {
-    pub {const} fn WEXITSTATUS(status: ::c_int) -> ::c_int {
+f! {
+    pub fn WEXITSTATUS(status: ::c_int) -> ::c_int {
         (status >> 8) & 0xff
     }
 
-    pub {const} fn WIFEXITED(status: ::c_int) -> bool {
+    pub fn WIFEXITED(status: ::c_int) -> bool {
         (status & 0xff) == 0
     }
 
-    pub {const} fn WTERMSIG(status: ::c_int) -> ::c_int {
+    pub fn WTERMSIG(status: ::c_int) -> ::c_int {
         status & 0x7f
     }
 }
@@ -960,10 +966,18 @@ safe_f! {
 extern "C" {
     pub fn getrlimit(resource: ::c_int, rlim: *mut ::rlimit) -> ::c_int;
     pub fn setrlimit(resource: ::c_int, rlim: *const ::rlimit) -> ::c_int;
-    pub fn strerror_r(errnum: ::c_int, buf: *mut c_char, buflen: ::size_t) -> ::c_int;
+    pub fn strerror_r(
+        errnum: ::c_int,
+        buf: *mut c_char,
+        buflen: ::size_t,
+    ) -> ::c_int;
 
     pub fn sem_destroy(sem: *mut sem_t) -> ::c_int;
-    pub fn sem_init(sem: *mut sem_t, pshared: ::c_int, value: ::c_uint) -> ::c_int;
+    pub fn sem_init(
+        sem: *mut sem_t,
+        pshared: ::c_int,
+        value: ::c_uint,
+    ) -> ::c_int;
 
     pub fn abs(i: ::c_int) -> ::c_int;
     pub fn atof(s: *const ::c_char) -> ::c_double;
@@ -971,9 +985,16 @@ extern "C" {
     pub fn rand() -> ::c_int;
     pub fn srand(seed: ::c_uint);
 
-    pub fn bind(s: ::c_int, name: *const ::sockaddr, namelen: ::socklen_t) -> ::c_int;
+    pub fn bind(
+        s: ::c_int,
+        name: *const ::sockaddr,
+        namelen: ::socklen_t,
+    ) -> ::c_int;
 
-    pub fn clock_gettime(clock_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
+    pub fn clock_gettime(
+        clock_id: ::clockid_t,
+        tp: *mut ::timespec,
+    ) -> ::c_int;
 
     pub fn gettimeofday(tp: *mut ::timeval, tz: *mut ::c_void) -> ::c_int;
     pub fn getpwuid_r(
@@ -996,7 +1017,11 @@ extern "C" {
         arg: *mut ::c_void,
     ) -> ::c_int;
 
-    pub fn pthread_sigmask(how: ::c_int, set: *const ::sigset_t, oset: *mut ::sigset_t) -> ::c_int;
+    pub fn pthread_sigmask(
+        how: ::c_int,
+        set: *const ::sigset_t,
+        oset: *mut ::sigset_t,
+    ) -> ::c_int;
 
     pub fn recvfrom(
         s: ::c_int,
