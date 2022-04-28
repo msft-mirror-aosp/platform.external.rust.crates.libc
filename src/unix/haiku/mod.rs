@@ -31,6 +31,22 @@ pub type id_t = i32;
 pub type idtype_t = ::c_uint;
 pub type fd_mask = u32;
 
+pub type Elf32_Addr = u32;
+pub type Elf32_Half = u16;
+pub type Elf32_Lword = u64;
+pub type Elf32_Off = u32;
+pub type Elf32_Sword = i32;
+pub type Elf32_Word = u32;
+
+pub type Elf64_Addr = u64;
+pub type Elf64_Half = u16;
+pub type Elf64_Lword = u64;
+pub type Elf64_Off = u64;
+pub type Elf64_Sword = i32;
+pub type Elf64_Sxword = i64;
+pub type Elf64_Word = u32;
+pub type Elf64_Xword = u64;
+
 #[cfg_attr(feature = "extra_traits", derive(Debug))]
 pub enum timezone {}
 impl ::Copy for timezone {}
@@ -100,6 +116,16 @@ s! {
         pub ai_canonname: *mut c_char,
         pub ai_addr: *mut ::sockaddr,
         pub ai_next: *mut addrinfo,
+    }
+
+    pub struct ifaddrs {
+        pub ifa_next: *mut ifaddrs,
+        pub ifa_name: *mut ::c_char,
+        pub ifa_flags: ::c_uint,
+        pub ifa_addr: *mut ::sockaddr,
+        pub ifa_netmask: *mut ::sockaddr,
+        pub ifa_dstaddr: *mut ::sockaddr,
+        pub ida_data: *mut ::c_void,
     }
 
     pub struct fd_set {
@@ -333,6 +359,17 @@ s! {
         pub sdl_slen: u8,
         pub sdl_data: [u8; 46],
     }
+
+    pub struct dl_phdr_info {
+        pub dlpi_addr: Elf_Addr,
+        pub dlpi_name: *const ::c_char,
+        pub dlpi_phdr: *const Elf_Phdr,
+        pub dlpi_phnum: Elf_Half,
+        pub dlpi_adds: ::c_ulonglong,
+        pub dlpi_subs: ::c_ulonglong,
+        pub dlpi_tls_modid: usize,
+        pub dlpi_tls_data: *mut ::c_void,
+    }
 }
 
 s_no_extra_traits! {
@@ -364,10 +401,63 @@ s_no_extra_traits! {
         __unused1: *mut ::c_void, // actually a function pointer
         pub sigev_notify_attributes: *mut ::pthread_attr_t,
     }
+
+    pub struct utmpx {
+        pub ut_type: ::c_short,
+        pub ut_tv: ::timeval,
+        pub ut_id: [::c_char; 8],
+        pub ut_pid: ::pid_t,
+        pub ut_user: [::c_char; 32],
+        pub ut_line: [::c_char; 16],
+        pub ut_host: [::c_char; 128],
+        __ut_reserved: [::c_char; 64],
+    }
 }
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
+        impl PartialEq for utmpx {
+            fn eq(&self, other: &utmpx) -> bool {
+                self.ut_type == other.ut_type
+                    && self.ut_tv == other.ut_tv
+                    && self.ut_id == other.ut_id
+                    && self.ut_pid == other.ut_pid
+                    && self.ut_user == other.ut_user
+                    && self.ut_line == other.ut_line
+                    && self.ut_host.iter().zip(other.ut_host.iter()).all(|(a,b)| a == b)
+                    && self.__ut_reserved == other.__ut_reserved
+            }
+        }
+
+        impl Eq for utmpx {}
+
+        impl ::fmt::Debug for utmpx {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("utmpx")
+                    .field("ut_type", &self.ut_type)
+                    .field("ut_tv", &self.ut_tv)
+                    .field("ut_id", &self.ut_id)
+                    .field("ut_pid", &self.ut_pid)
+                    .field("ut_user", &self.ut_user)
+                    .field("ut_line", &self.ut_line)
+                    .field("ut_host", &self.ut_host)
+                    .field("__ut_reserved", &self.__ut_reserved)
+                    .finish()
+            }
+        }
+
+        impl ::hash::Hash for utmpx {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.ut_type.hash(state);
+                self.ut_tv.hash(state);
+                self.ut_id.hash(state);
+                self.ut_pid.hash(state);
+                self.ut_user.hash(state);
+                self.ut_line.hash(state);
+                self.ut_host.hash(state);
+                self.__ut_reserved.hash(state);
+            }
+        }
         impl PartialEq for sockaddr_un {
             fn eq(&self, other: &sockaddr_un) -> bool {
                 self.sun_len == other.sun_len
@@ -1265,6 +1355,16 @@ pub const PRIO_PROCESS: ::c_int = 0;
 pub const PRIO_PGRP: ::c_int = 1;
 pub const PRIO_USER: ::c_int = 2;
 
+// utmpx entry types
+pub const EMPTY: ::c_short = 0;
+pub const BOOT_TIME: ::c_short = 1;
+pub const OLD_TIME: ::c_short = 2;
+pub const NEW_TIME: ::c_short = 3;
+pub const USER_PROCESS: ::c_short = 4;
+pub const INIT_PROCESS: ::c_short = 5;
+pub const LOGIN_PROCESS: ::c_short = 6;
+pub const DEAD_PROCESS: ::c_short = 7;
+
 pub const LOG_PID: ::c_int = 1 << 12;
 pub const LOG_CONS: ::c_int = 2 << 12;
 pub const LOG_ODELAY: ::c_int = 4 << 12;
@@ -1387,6 +1487,12 @@ extern "C" {
     pub fn getpriority(which: ::c_int, who: id_t) -> ::c_int;
     pub fn setpriority(which: ::c_int, who: id_t, priority: ::c_int) -> ::c_int;
 
+    pub fn endusershell();
+    pub fn getpass(prompt: *const ::c_char) -> *mut ::c_char;
+    pub fn getusershell() -> *mut ::c_char;
+    pub fn issetugid() -> ::c_int;
+    pub fn setusershell();
+
     pub fn utimensat(
         fd: ::c_int,
         path: *const ::c_char,
@@ -1402,6 +1508,14 @@ extern "C" {
     pub fn labs(i: ::c_long) -> ::c_long;
     pub fn rand() -> ::c_int;
     pub fn srand(seed: ::c_uint);
+    pub fn getifaddrs(ifap: *mut *mut ::ifaddrs) -> ::c_int;
+    pub fn freeifaddrs(ifa: *mut ::ifaddrs);
+    pub fn ppoll(
+        fds: *mut ::pollfd,
+        numfds: ::nfds_t,
+        timeout: *const ::timespec,
+        sigMask: *const sigset_t,
+    ) -> ::c_int;
 }
 
 #[link(name = "bsd")]
@@ -1510,6 +1624,12 @@ extern "C" {
         buflen: ::size_t,
         result: *mut *mut ::group,
     ) -> ::c_int;
+    pub fn getgrouplist(
+        user: *const ::c_char,
+        basegroup: ::gid_t,
+        grouplist: *mut ::gid_t,
+        groupcount: *mut ::c_int,
+    ) -> ::c_int;
     pub fn sigaltstack(ss: *const stack_t, oss: *mut stack_t) -> ::c_int;
     pub fn sem_close(sem: *mut sem_t) -> ::c_int;
     pub fn getdtablesize() -> ::c_int;
@@ -1563,6 +1683,29 @@ extern "C" {
     ) -> ::pid_t;
     pub fn sethostname(name: *const ::c_char, len: ::size_t) -> ::c_int;
     pub fn uname(buf: *mut ::utsname) -> ::c_int;
+    pub fn getutxent() -> *mut utmpx;
+    pub fn getutxid(ut: *const utmpx) -> *mut utmpx;
+    pub fn getutxline(ut: *const utmpx) -> *mut utmpx;
+    pub fn pututxline(ut: *const utmpx) -> *mut utmpx;
+    pub fn setutxent();
+    pub fn endutxent();
+
+    pub fn dl_iterate_phdr(
+        callback: ::Option<
+            unsafe extern "C" fn(
+                info: *mut dl_phdr_info,
+                size: usize,
+                data: *mut ::c_void,
+            ) -> ::c_int,
+        >,
+        data: *mut ::c_void,
+    ) -> ::c_int;
+
+    pub fn strsep(string: *mut *mut ::c_char, delimiters: *const ::c_char) -> *mut ::c_char;
+    pub fn explicit_bzero(buf: *mut ::c_void, len: ::size_t);
+
+    pub fn login_tty(_fd: ::c_int) -> ::c_int;
+    pub fn fgetln(stream: *mut ::FILE, _length: *mut ::size_t) -> *mut ::c_char;
 }
 
 cfg_if! {
