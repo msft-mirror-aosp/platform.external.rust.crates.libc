@@ -123,11 +123,11 @@ s! {
         pub st_ctime_nsec: ::c_long,
         pub st_size: ::off_t,
         pub st_blocks: i64,
-        pub st_blksize: u32,
+        pub __old_st_blksize: u32,
         pub st_flags: u32,
         pub st_gen: u32,
         pub st_lspare: i32,
-        pub st_qspare1: i64,
+        pub st_blksize: i64,
         pub st_qspare2: i64,
     }
 
@@ -209,6 +209,54 @@ s! {
         pub shm_dtime: ::time_t,
         pub shm_ctime: ::time_t,
         shm_internal: *mut ::c_void,
+    }
+
+    pub struct kinfo_file {
+        pub f_size: ::size_t,
+        pub f_pid: ::pid_t,
+        pub f_uid: ::uid_t,
+        pub f_fd: ::c_int,
+        pub f_file: *mut ::c_void,
+        pub f_type: ::c_short,
+        pub f_count: ::c_int,
+        pub f_msgcount: ::c_int,
+        pub f_offset: ::off_t,
+        pub f_data: *mut ::c_void,
+        pub f_flag: ::c_uint,
+    }
+
+    pub struct kinfo_cputime {
+        pub cp_user: u64,
+        pub cp_nice: u64,
+        pub cp_sys: u64,
+        pub cp_intr: u64,
+        pub cp_idel: u64,
+        cp_unused01: u64,
+        cp_unused02: u64,
+        pub cp_sample_pc: u64,
+        pub cp_sample_sp: u64,
+        pub cp_msg: [::c_char; 32],
+    }
+
+    pub struct cpuctl_msr_args_t {
+        pub msr: ::c_int,
+        pub data: u64,
+    }
+
+    pub struct cpuctl_cpuid_args_t {
+        pub level: ::c_int,
+        pub data: [u32; 4],
+    }
+
+    pub struct cpuctl_cpuid_count_args_t {
+        pub level: ::c_int,
+        pub level_type: ::c_int,
+        pub data: [u32; 4],
+    }
+
+    pub struct cpuctl_update_args_t {
+        pub data: *mut ::c_void,
+        pub size: ::size_t,
     }
 }
 
@@ -701,6 +749,10 @@ cfg_if! {
 pub const RAND_MAX: ::c_int = 0x7fff_ffff;
 pub const PTHREAD_STACK_MIN: ::size_t = 16384;
 pub const SIGSTKSZ: ::size_t = 40960;
+pub const SIGCKPT: ::c_int = 33;
+pub const SIGCKPTEXIT: ::c_int = 34;
+pub const CKPT_FREEZE: ::c_int = 0x1;
+pub const CKPT_THAW: ::c_int = 0x2;
 pub const MADV_INVAL: ::c_int = 10;
 pub const MADV_SETMAP: ::c_int = 11;
 pub const O_CLOEXEC: ::c_int = 0x00020000;
@@ -708,7 +760,10 @@ pub const O_DIRECTORY: ::c_int = 0x08000000;
 pub const F_GETLK: ::c_int = 7;
 pub const F_SETLK: ::c_int = 8;
 pub const F_SETLKW: ::c_int = 9;
+pub const F_GETPATH: ::c_int = 19;
 pub const ENOMEDIUM: ::c_int = 93;
+pub const ENOTRECOVERABLE: ::c_int = 94;
+pub const EOWNERDEAD: ::c_int = 95;
 pub const EASYNC: ::c_int = 99;
 pub const ELAST: ::c_int = 99;
 pub const RLIMIT_POSIXLOCKS: ::c_int = 11;
@@ -850,6 +905,14 @@ pub const CTL_P1003_1B_SIGQUEUE_MAX: ::c_int = 24;
 pub const CTL_P1003_1B_TIMER_MAX: ::c_int = 25;
 pub const CTL_P1003_1B_MAXID: ::c_int = 26;
 
+pub const CPUCTL_RSMSR: ::c_int = 0xc0106301;
+pub const CPUCTL_WRMSR: ::c_int = 0xc0106302;
+pub const CPUCTL_CPUID: ::c_int = 0xc0106303;
+pub const CPUCTL_UPDATE: ::c_int = 0xc0106304;
+pub const CPUCTL_MSRSBIT: ::c_int = 0xc0106305;
+pub const CPUCTL_MSRCBIT: ::c_int = 0xc0106306;
+pub const CPUCTL_CPUID_COUNT: ::c_int = 0xc0106307;
+
 pub const EVFILT_READ: i16 = -1;
 pub const EVFILT_WRITE: i16 = -2;
 pub const EVFILT_AIO: i16 = -3;
@@ -874,6 +937,8 @@ pub const EV_FLAG1: u16 = 0x2000;
 pub const EV_ERROR: u16 = 0x4000;
 pub const EV_EOF: u16 = 0x8000;
 pub const EV_SYSFLAGS: u16 = 0xf000;
+
+pub const FIODNAME: ::c_ulong = 0x80106678;
 
 pub const NOTE_TRIGGER: u32 = 0x01000000;
 pub const NOTE_FFNOP: u32 = 0x00000000;
@@ -902,6 +967,7 @@ pub const NOTE_CHILD: u32 = 0x00000004;
 
 pub const SO_SNDSPACE: ::c_int = 0x100a;
 pub const SO_CPUHINT: ::c_int = 0x1030;
+pub const SO_PASSCRED: ::c_int = 0x4000;
 
 pub const PT_FIRSTMACH: ::c_int = 32;
 
@@ -1223,11 +1289,11 @@ pub const LC_ALL_MASK: ::c_int = LC_COLLATE_MASK
     | LC_NUMERIC_MASK
     | LC_TIME_MASK;
 
-pub const TIOCSIG: ::c_uint = 0x2000745f;
+pub const TIOCSIG: ::c_ulong = 0x2000745f;
 pub const BTUARTDISC: ::c_int = 0x7;
-pub const TIOCDCDTIMESTAMP: ::c_uint = 0x40107458;
-pub const TIOCISPTMASTER: ::c_uint = 0x20007455;
-pub const TIOCMODG: ::c_uint = 0x40047403;
+pub const TIOCDCDTIMESTAMP: ::c_ulong = 0x40107458;
+pub const TIOCISPTMASTER: ::c_ulong = 0x20007455;
+pub const TIOCMODG: ::c_ulong = 0x40047403;
 pub const TIOCMODS: ::c_ulong = 0x80047404;
 pub const TIOCREMOTE: ::c_ulong = 0x80047469;
 
@@ -1280,9 +1346,11 @@ pub const SF_XLINK: ::c_ulong = 0x01000000;
 pub const UTIME_OMIT: c_long = -2;
 pub const UTIME_NOW: c_long = -1;
 
+pub const MINCORE_SUPER: ::c_int = 0x20;
+
 const_fn! {
     {const} fn _CMSG_ALIGN(n: usize) -> usize {
-        (n + 3) & !3
+        (n + (::mem::size_of::<::c_long>() - 1)) & !(::mem::size_of::<::c_long>() - 1)
     }
 }
 
@@ -1335,7 +1403,7 @@ f! {
         ()
     }
 
-    pub fn CPU_ISSET(cpu: usize, cpuset: &mut cpu_set_t) -> bool {
+    pub fn CPU_ISSET(cpu: usize, cpuset: &cpu_set_t) -> bool {
         let (idx, offset) = ((cpu >> 6) & 3, cpu & 63);
         0 != cpuset.ary[idx] & (1 << offset)
     }
@@ -1355,6 +1423,13 @@ extern "C" {
     pub fn setutxdb(_type: ::c_uint, file: *mut ::c_char) -> ::c_int;
 
     pub fn aio_waitcomplete(iocbp: *mut *mut aiocb, timeout: *mut ::timespec) -> ::c_int;
+
+    pub fn devname_r(
+        dev: ::dev_t,
+        mode: ::mode_t,
+        buf: *mut ::c_char,
+        len: ::size_t,
+    ) -> *mut ::c_char;
 
     pub fn waitid(
         idtype: idtype_t,
@@ -1390,6 +1465,7 @@ extern "C" {
     pub fn sched_getaffinity(pid: ::pid_t, cpusetsize: ::size_t, mask: *mut cpu_set_t) -> ::c_int;
     pub fn sched_setaffinity(pid: ::pid_t, cpusetsize: ::size_t, mask: *const cpu_set_t)
         -> ::c_int;
+    pub fn sched_getcpu() -> ::c_int;
     pub fn setproctitle(fmt: *const ::c_char, ...);
 
     pub fn shmget(key: ::key_t, size: ::size_t, shmflg: ::c_int) -> ::c_int;
@@ -1403,6 +1479,8 @@ extern "C" {
     pub fn updlastlogx(fname: *const ::c_char, uid: ::uid_t, ll: *mut lastlogx) -> ::c_int;
     pub fn getutxuser(name: *const ::c_char) -> utmpx;
     pub fn utmpxname(file: *const ::c_char) -> ::c_int;
+
+    pub fn sys_checkpoint(tpe: ::c_int, fd: ::c_int, pid: ::pid_t, retval: ::c_int) -> ::c_int;
 }
 
 #[link(name = "rt")]
