@@ -42,7 +42,7 @@ rust_library {
     host_supported: true,
     crate_name: "libc",
     cargo_env_compat: true,
-    cargo_pkg_version: "0.2.102",
+    cargo_pkg_version: "0.2.119",
     srcs: ["src/lib.rs"],
     edition: "2015",
     features: [
@@ -56,8 +56,10 @@ rust_library {
         "libc_cfg_target_vendor",
         "libc_const_size_of",
         "libc_core_cvoid",
+        "libc_non_exhaustive",
         "libc_packedN",
         "libc_priv_mod_use",
+        "libc_ptr_addr_of",
         "libc_union",
     ],
     apex_available: [
