@@ -39,7 +39,12 @@ pub type Elf64_Section = u16;
 
 // linux/can.h
 pub type canid_t = u32;
+
+// linux/can/j1939.h
 pub type can_err_mask_t = u32;
+pub type pgn_t = u32;
+pub type priority_t = u8;
+pub type name_t = u64;
 
 pub type iconv_t = *mut ::c_void;
 
@@ -543,6 +548,16 @@ s! {
         pub can_mask: canid_t,
     }
 
+    // linux/can/j1939.h
+    pub struct j1939_filter {
+        pub name: name_t,
+        pub name_mask: name_t,
+        pub pgn: pgn_t,
+        pub pgn_mask: pgn_t,
+        pub addr: u8,
+        pub addr_mask: u8,
+    }
+
     // linux/filter.h
     pub struct sock_filter {
         pub code: ::__u16,
@@ -670,16 +685,12 @@ s_no_extra_traits! {
     }
 }
 
-cfg_if! {
-    if #[cfg(not(all(target_env = "musl", target_arch = "mips")))] {
-        s_no_extra_traits! {
-            // linux/net_tstamp.h
-            #[allow(missing_debug_implementations)]
-            pub struct sock_txtime {
-                pub clockid: ::clockid_t,
-                pub flags: ::__u32,
-            }
-        }
+s_no_extra_traits! {
+    // linux/net_tstamp.h
+    #[allow(missing_debug_implementations)]
+    pub struct sock_txtime {
+        pub clockid: ::clockid_t,
+        pub flags: ::__u32,
     }
 }
 
@@ -1483,6 +1494,9 @@ pub const MPOL_PREFERRED: ::c_int = 1;
 pub const MPOL_BIND: ::c_int = 2;
 pub const MPOL_INTERLEAVE: ::c_int = 3;
 pub const MPOL_LOCAL: ::c_int = 4;
+pub const MPOL_F_NUMA_BALANCING: ::c_int = 1 << 13;
+pub const MPOL_F_RELATIVE_NODES: ::c_int = 1 << 14;
+pub const MPOL_F_STATIC_NODES: ::c_int = 1 << 15;
 
 align_const! {
     pub const PTHREAD_MUTEX_INITIALIZER: pthread_mutex_t = pthread_mutex_t {
@@ -1501,6 +1515,9 @@ pub const PTHREAD_MUTEX_ERRORCHECK: ::c_int = 2;
 pub const PTHREAD_MUTEX_DEFAULT: ::c_int = PTHREAD_MUTEX_NORMAL;
 pub const PTHREAD_MUTEX_STALLED: ::c_int = 0;
 pub const PTHREAD_MUTEX_ROBUST: ::c_int = 1;
+pub const PTHREAD_PRIO_NONE: ::c_int = 0;
+pub const PTHREAD_PRIO_INHERIT: ::c_int = 1;
+pub const PTHREAD_PRIO_PROTECT: ::c_int = 2;
 pub const PTHREAD_PROCESS_PRIVATE: ::c_int = 0;
 pub const PTHREAD_PROCESS_SHARED: ::c_int = 1;
 pub const __SIZEOF_PTHREAD_COND_T: usize = 48;
@@ -1758,8 +1775,12 @@ pub const PR_CAP_AMBIENT_RAISE: ::c_int = 2;
 pub const PR_CAP_AMBIENT_LOWER: ::c_int = 3;
 pub const PR_CAP_AMBIENT_CLEAR_ALL: ::c_int = 4;
 
+pub const PR_SET_VMA: ::c_int = 0x53564d41;
+pub const PR_SET_VMA_ANON_NAME: ::c_int = 0;
+
 pub const GRND_NONBLOCK: ::c_uint = 0x0001;
 pub const GRND_RANDOM: ::c_uint = 0x0002;
+pub const GRND_INSECURE: ::c_uint = 0x0004;
 
 pub const SECCOMP_MODE_DISABLED: ::c_uint = 0;
 pub const SECCOMP_MODE_STRICT: ::c_uint = 1;
@@ -2639,12 +2660,8 @@ pub const SOF_TIMESTAMPING_RX_SOFTWARE: ::c_uint = 1 << 3;
 pub const SOF_TIMESTAMPING_SOFTWARE: ::c_uint = 1 << 4;
 pub const SOF_TIMESTAMPING_SYS_HARDWARE: ::c_uint = 1 << 5;
 pub const SOF_TIMESTAMPING_RAW_HARDWARE: ::c_uint = 1 << 6;
-cfg_if! {
-    if #[cfg(not(all(target_env = "musl", target_arch = "mips")))] {
-        pub const SOF_TXTIME_DEADLINE_MODE: u32 = 1 << 0;
-        pub const SOF_TXTIME_REPORT_ERRORS: u32 = 1 << 1;
-    }
-}
+pub const SOF_TXTIME_DEADLINE_MODE: u32 = 1 << 0;
+pub const SOF_TXTIME_REPORT_ERRORS: u32 = 1 << 1;
 
 // linux/if_alg.h
 pub const ALG_SET_KEY: ::c_int = 1;
@@ -3181,6 +3198,47 @@ pub const CAN_RAW_LOOPBACK: ::c_int = 3;
 pub const CAN_RAW_RECV_OWN_MSGS: ::c_int = 4;
 pub const CAN_RAW_FD_FRAMES: ::c_int = 5;
 pub const CAN_RAW_JOIN_FILTERS: ::c_int = 6;
+
+// linux/can/j1939.h
+pub const SOL_CAN_J1939: ::c_int = SOL_CAN_BASE + CAN_J1939;
+
+pub const J1939_MAX_UNICAST_ADDR: ::c_uchar = 0xfd;
+pub const J1939_IDLE_ADDR: ::c_uchar = 0xfe;
+pub const J1939_NO_ADDR: ::c_uchar = 0xff;
+pub const J1939_NO_NAME: ::c_ulong = 0;
+pub const J1939_PGN_REQUEST: ::c_uint = 0x0ea00;
+pub const J1939_PGN_ADDRESS_CLAIMED: ::c_uint = 0x0ee00;
+pub const J1939_PGN_ADDRESS_COMMANDED: ::c_uint = 0x0fed8;
+pub const J1939_PGN_PDU1_MAX: ::c_uint = 0x3ff00;
+pub const J1939_PGN_MAX: ::c_uint = 0x3ffff;
+pub const J1939_NO_PGN: ::c_uint = 0x40000;
+
+pub const SO_J1939_FILTER: ::c_int = 1;
+pub const SO_J1939_PROMISC: ::c_int = 2;
+pub const SO_J1939_SEND_PRIO: ::c_int = 3;
+pub const SO_J1939_ERRQUEUE: ::c_int = 4;
+
+pub const SCM_J1939_DEST_ADDR: ::c_int = 1;
+pub const SCM_J1939_DEST_NAME: ::c_int = 2;
+pub const SCM_J1939_PRIO: ::c_int = 3;
+pub const SCM_J1939_ERRQUEUE: ::c_int = 4;
+
+pub const J1939_NLA_PAD: ::c_int = 0;
+pub const J1939_NLA_BYTES_ACKED: ::c_int = 1;
+pub const J1939_NLA_TOTAL_SIZE: ::c_int = 2;
+pub const J1939_NLA_PGN: ::c_int = 3;
+pub const J1939_NLA_SRC_NAME: ::c_int = 4;
+pub const J1939_NLA_DEST_NAME: ::c_int = 5;
+pub const J1939_NLA_SRC_ADDR: ::c_int = 6;
+pub const J1939_NLA_DEST_ADDR: ::c_int = 7;
+
+pub const J1939_EE_INFO_NONE: ::c_int = 0;
+pub const J1939_EE_INFO_TX_ABORT: ::c_int = 1;
+pub const J1939_EE_INFO_RX_RTS: ::c_int = 2;
+pub const J1939_EE_INFO_RX_DPO: ::c_int = 3;
+pub const J1939_EE_INFO_RX_ABORT: ::c_int = 4;
+
+pub const J1939_FILTER_MAX: ::c_int = 512;
 
 f! {
     pub fn NLA_ALIGN(len: ::c_int) -> ::c_int {
@@ -3726,6 +3784,14 @@ extern "C" {
         timeout: *const ::timespec,
         sigmask: *const sigset_t,
     ) -> ::c_int;
+    pub fn pthread_mutexattr_getprotocol(
+        attr: *const pthread_mutexattr_t,
+        protocol: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_mutexattr_setprotocol(
+        attr: *mut pthread_mutexattr_t,
+        protocol: ::c_int,
+    ) -> ::c_int;
     pub fn pthread_mutex_consistent(mutex: *mut pthread_mutex_t) -> ::c_int;
     pub fn pthread_mutex_timedlock(
         lock: *mut pthread_mutex_t,
@@ -4024,6 +4090,9 @@ extern "C" {
         needlelen: ::size_t,
     ) -> *mut ::c_void;
     pub fn sched_getcpu() -> ::c_int;
+
+    pub fn pthread_getname_np(thread: ::pthread_t, name: *mut ::c_char, len: ::size_t) -> ::c_int;
+    pub fn pthread_setname_np(thread: ::pthread_t, name: *const ::c_char) -> ::c_int;
 }
 
 cfg_if! {
