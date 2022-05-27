@@ -8,20 +8,6 @@ s! {
         __size: [::c_ulong; 7],
     }
 
-    pub struct msqid_ds {
-        pub msg_perm: ::ipc_perm,
-        pub msg_stime: ::time_t,
-        pub msg_rtime: ::time_t,
-        pub msg_ctime: ::time_t,
-        __msg_cbytes: ::c_ulong,
-        pub msg_qnum: ::msgqnum_t,
-        pub msg_qbytes: ::msglen_t,
-        pub msg_lspid: ::pid_t,
-        pub msg_lrpid: ::pid_t,
-        __glibc_reserved4: ::c_ulong,
-        __glibc_reserved5: ::c_ulong,
-    }
-
     pub struct stat {
         pub st_dev: ::dev_t,
         pub st_ino: ::ino_t,
@@ -81,21 +67,6 @@ s! {
         pub f_spare: [::c_long; 4],
     }
 
-    pub struct statfs64 {
-        pub f_type: ::c_long,
-        pub f_bsize: ::c_long,
-        pub f_blocks: ::fsblkcnt64_t,
-        pub f_bfree: ::fsblkcnt64_t,
-        pub f_bavail: ::fsblkcnt64_t,
-        pub f_files: ::fsfilcnt64_t,
-        pub f_ffree: ::fsfilcnt64_t,
-        pub f_fsid: ::fsid_t,
-        pub f_namelen: ::c_long,
-        pub f_frsize: ::c_long,
-        pub f_flags: ::c_long,
-        pub f_spare: [::c_long; 4],
-    }
-
     pub struct statvfs {
         pub f_bsize: ::c_ulong,
         pub f_frsize: ::c_ulong,
@@ -111,19 +82,35 @@ s! {
         pub __f_spare: [::c_int; 6],
     }
 
+    pub struct statfs64 {
+        pub f_type: ::c_ulong,
+        pub f_bsize: ::c_ulong,
+        pub f_blocks: ::fsblkcnt_t,
+        pub f_bfree: ::fsblkcnt_t,
+        pub f_bavail: ::fsblkcnt_t,
+        pub f_files: ::fsfilcnt_t,
+        pub f_ffree: ::fsfilcnt_t,
+        pub f_fsid: ::fsid_t,
+        pub f_namelen: ::c_ulong,
+        pub f_frsize: ::c_ulong,
+        pub f_flags: ::c_ulong,
+        pub f_spare: [::c_ulong; 4],
+    }
+
     pub struct statvfs64 {
         pub f_bsize: ::c_ulong,
         pub f_frsize: ::c_ulong,
-        pub f_blocks: ::fsblkcnt64_t,
-        pub f_bfree: ::fsblkcnt64_t,
-        pub f_bavail: ::fsblkcnt64_t,
-        pub f_files: ::fsfilcnt64_t,
-        pub f_ffree: ::fsfilcnt64_t,
-        pub f_favail: ::fsfilcnt64_t,
+        pub f_blocks: u64,
+        pub f_bfree: u64,
+        pub f_bavail: u64,
+        pub f_files: u64,
+        pub f_ffree: u64,
+        pub f_favail: u64,
         pub f_fsid: ::c_ulong,
+        __f_unused: ::c_int,
         pub f_flag: ::c_ulong,
         pub f_namemax: ::c_ulong,
-        pub __f_spare: [::c_int; 6],
+        __f_spare: [::c_int; 6],
     }
 
     pub struct siginfo_t {
@@ -181,6 +168,23 @@ s! {
         __unused6: ::c_ulong,
     }
 
+    pub struct msqid_ds {
+        pub msg_perm: ::ipc_perm,
+        pub msg_stime: ::time_t,
+        __unused1: ::c_int,
+        pub msg_rtime: ::time_t,
+        __unused2: ::c_int,
+        pub msg_ctime: ::time_t,
+        __unused3: ::c_int,
+        __msg_cbytes: ::c_ulong,
+        pub msg_qnum: ::msgqnum_t,
+        pub msg_qbytes: ::msglen_t,
+        pub msg_lspid: ::pid_t,
+        pub msg_lrpid: ::pid_t,
+        __pad1: ::c_ulong,
+        __pad2: ::c_ulong,
+    }
+
     pub struct flock {
         pub l_type: ::c_short,
         pub l_whence: ::c_short,
@@ -198,11 +202,20 @@ s! {
     }
 }
 
-pub const O_LARGEFILE: ::c_int = 0;
+//pub const RLIM_INFINITY: ::rlim_t = !0;
 pub const VEOF: usize = 4;
 pub const RTLD_DEEPBIND: ::c_int = 0x8;
 pub const RTLD_GLOBAL: ::c_int = 0x100;
 pub const RTLD_NOLOAD: ::c_int = 0x4;
+pub const TIOCGSOFTCAR: ::c_ulong = 21529;
+pub const TIOCSSOFTCAR: ::c_ulong = 21530;
+pub const TIOCGRS485: ::c_int = 21550;
+pub const TIOCSRS485: ::c_int = 21551;
+//pub const RLIMIT_RSS: ::__rlimit_resource_t = 5;
+//pub const RLIMIT_AS: ::__rlimit_resource_t = 9;
+//pub const RLIMIT_MEMLOCK: ::__rlimit_resource_t = 8;
+//pub const RLIMIT_NOFILE: ::__rlimit_resource_t = 7;
+//pub const RLIMIT_NPROC: ::__rlimit_resource_t = 6;
 pub const O_APPEND: ::c_int = 1024;
 pub const O_CREAT: ::c_int = 64;
 pub const O_EXCL: ::c_int = 128;
@@ -212,7 +225,6 @@ pub const O_SYNC: ::c_int = 1052672;
 pub const O_RSYNC: ::c_int = 1052672;
 pub const O_DSYNC: ::c_int = 4096;
 pub const O_FSYNC: ::c_int = 1052672;
-pub const MADV_SOFT_OFFLINE: ::c_int = 101;
 pub const MAP_GROWSDOWN: ::c_int = 256;
 pub const EDEADLK: ::c_int = 35;
 pub const ENAMETOOLONG: ::c_int = 36;
@@ -295,6 +307,7 @@ pub const ERFKILL: ::c_int = 132;
 
 pub const SOCK_STREAM: ::c_int = 1;
 pub const SOCK_DGRAM: ::c_int = 2;
+pub const SA_ONSTACK: ::c_int = 8;
 pub const SA_SIGINFO: ::c_int = 4;
 pub const SA_NOCLDWAIT: ::c_int = 2;
 pub const SIGTTIN: ::c_int = 21;
@@ -332,6 +345,23 @@ pub const SFD_NONBLOCK: ::c_int = 2048;
 pub const TCSANOW: ::c_int = 0;
 pub const TCSADRAIN: ::c_int = 1;
 pub const TCSAFLUSH: ::c_int = 2;
+pub const TIOCLINUX: ::c_ulong = 21532;
+pub const TIOCGSERIAL: ::c_ulong = 21534;
+pub const TIOCEXCL: ::c_ulong = 21516;
+pub const TIOCNXCL: ::c_ulong = 21517;
+pub const TIOCSCTTY: ::c_ulong = 21518;
+pub const TIOCSTI: ::c_ulong = 21522;
+pub const TIOCMGET: ::c_ulong = 21525;
+pub const TIOCMBIS: ::c_ulong = 21526;
+pub const TIOCMBIC: ::c_ulong = 21527;
+pub const TIOCMSET: ::c_ulong = 21528;
+pub const TIOCCONS: ::c_ulong = 21533;
+pub const TIOCM_ST: ::c_int = 8;
+pub const TIOCM_SR: ::c_int = 16;
+pub const TIOCM_CTS: ::c_int = 32;
+pub const TIOCM_CAR: ::c_int = 64;
+pub const TIOCM_RNG: ::c_int = 128;
+pub const TIOCM_DSR: ::c_int = 256;
 
 pub const __SIZEOF_PTHREAD_CONDATTR_T: usize = 4;
 pub const __SIZEOF_PTHREAD_MUTEXATTR_T: usize = 4;
@@ -355,6 +385,9 @@ pub const ENOTNAM: ::c_int = 118;
 pub const ENAVAIL: ::c_int = 119;
 pub const EISNAM: ::c_int = 120;
 pub const EREMOTEIO: ::c_int = 121;
+pub const FIOCLEX: ::c_int = 21585;
+pub const FIONCLEX: ::c_int = 21584;
+pub const FIONBIO: ::c_int = 21537;
 pub const MCL_CURRENT: ::c_int = 1;
 pub const MCL_FUTURE: ::c_int = 2;
 pub const SIGSTKSZ: ::size_t = 8192;
@@ -450,18 +483,26 @@ pub const IEXTEN: ::tcflag_t = 32768;
 pub const TOSTOP: ::tcflag_t = 256;
 pub const FLUSHO: ::tcflag_t = 4096;
 pub const EXTPROC: ::tcflag_t = 65536;
+pub const TCGETS: ::c_int = 21505;
+pub const TCSETS: ::c_int = 21506;
+pub const TCSETSW: ::c_int = 21507;
+pub const TCSETSF: ::c_int = 21508;
+pub const TCGETA: ::c_int = 21509;
+pub const TCSETA: ::c_int = 21510;
+pub const TCSETAW: ::c_int = 21511;
+pub const TCSETAF: ::c_int = 21512;
+pub const TCSBRK: ::c_int = 21513;
+pub const TCXONC: ::c_int = 21514;
+pub const TCFLSH: ::c_int = 21515;
+pub const TIOCINQ: ::c_int = 21531;
+pub const TIOCGPGRP: ::c_int = 21519;
+pub const TIOCSPGRP: ::c_int = 21520;
+pub const TIOCOUTQ: ::c_int = 21521;
+pub const TIOCGWINSZ: ::c_int = 21523;
+pub const TIOCSWINSZ: ::c_int = 21524;
+pub const FIONREAD: ::c_int = 21531;
 pub const __SIZEOF_PTHREAD_MUTEX_T: usize = 40;
 pub const __SIZEOF_PTHREAD_RWLOCK_T: usize = 56;
-pub const NGREG: usize = 32;
-pub const REG_PC: usize = 0;
-pub const REG_RA: usize = 1;
-pub const REG_SP: usize = 2;
-pub const REG_TP: usize = 4;
-pub const REG_S0: usize = 8;
-pub const REG_S1: usize = 9;
-pub const REG_A0: usize = 10;
-pub const REG_S2: usize = 18;
-pub const REG_NARGS: usize = 8;
 
 pub const SYS_read: ::c_long = 63;
 pub const SYS_write: ::c_long = 64;
@@ -738,7 +779,6 @@ pub const SYS_pkey_mprotect: ::c_long = 288;
 pub const SYS_pkey_alloc: ::c_long = 289;
 pub const SYS_pkey_free: ::c_long = 290;
 pub const SYS_statx: ::c_long = 291;
-pub const SYS_rseq: ::c_long = 293;
 pub const SYS_pidfd_send_signal: ::c_long = 424;
 pub const SYS_io_uring_setup: ::c_long = 425;
 pub const SYS_io_uring_enter: ::c_long = 426;
