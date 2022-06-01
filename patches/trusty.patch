@@ -1,0 +1,83 @@
+From dc028fa4f316bec221c9b59d02a1c2648bb1cbbd Mon Sep 17 00:00:00 2001
+From: David LeGare <legare@google.com>
+Date: Mon, 23 May 2022 17:58:51 +0000
+Subject: [PATCH] Add support for the Trusty OS
+
+---
+ src/lib.rs    |  6 ++++++
+ src/trusty.rs | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 52 insertions(+)
+ create mode 100644 src/trusty.rs
+
+diff --git a/src/lib.rs b/src/lib.rs
+index d87d0d8e1..2eeb88c83 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -141,6 +141,12 @@ cfg_if! {
+ 
+         mod hermit;
+         pub use hermit::*;
++    } else if #[cfg(target_os = "trusty")] {
++        mod fixed_width_ints;
++        pub use fixed_width_ints::*;
++
++        mod trusty;
++        pub use trusty::*;
+     } else if #[cfg(all(target_env = "sgx", target_vendor = "fortanix"))] {
+         mod fixed_width_ints;
+         pub use fixed_width_ints::*;
+diff --git a/src/trusty.rs b/src/trusty.rs
+new file mode 100644
+index 000000000..2b7d57285
+--- /dev/null
++++ b/src/trusty.rs
+@@ -0,0 +1,46 @@
++pub use core::ffi::c_void;
++
++pub type size_t = usize;
++
++#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
++pub type c_char = u8;
++#[cfg(target_arch = "x86_64")]
++pub type c_char = i8;
++
++pub type c_schar = i8;
++pub type c_uchar = u8;
++pub type c_short = i16;
++pub type c_ushort = u16;
++pub type c_int = i32;
++pub type c_uint = u32;
++
++#[cfg(target_pointer_width = "32")]
++pub type c_long = i32;
++#[cfg(target_pointer_width = "64")]
++pub type c_long = i64;
++
++#[cfg(target_pointer_width = "32")]
++pub type c_ulong = u32;
++#[cfg(target_pointer_width = "64")]
++pub type c_ulong = u64;
++
++pub type c_longlong = i64;
++pub type c_ulonglong = u64;
++
++pub type c_uint8_t = u8;
++pub type c_uint16_t = u16;
++pub type c_uint32_t = u32;
++pub type c_uint64_t = u64;
++
++pub type c_int8_t = i8;
++pub type c_int16_t = i16;
++pub type c_int32_t = i32;
++pub type c_int64_t = i64;
++
++extern "C" {
++    pub fn calloc(nobj: size_t, size: size_t) -> *mut c_void;
++    pub fn malloc(size: size_t) -> *mut c_void;
++    pub fn realloc(p: *mut c_void, size: size_t) -> *mut c_void;
++    pub fn free(p: *mut c_void);
++    pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
++}
+-- 
+2.36.1.124.g0e6072fb45-goog
+
