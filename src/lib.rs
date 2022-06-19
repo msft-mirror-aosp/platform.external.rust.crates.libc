@@ -31,6 +31,7 @@
 #![cfg_attr(libc_const_extern_fn, feature(const_extern_fn))]
 
 // ANDROID: Use std to allow building as a dylib.
+#[cfg(android_dylib)]
 extern crate std;
 
 #[macro_use]
