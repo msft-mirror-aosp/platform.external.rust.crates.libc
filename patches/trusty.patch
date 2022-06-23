@@ -1,19 +1,20 @@
-From e8131d6a00005b4686f26d25d8617dd83540e98d Mon Sep 17 00:00:00 2001
+From b81e3bd53bb4c60e6a778fa230cb8fd2a73b3683 Mon Sep 17 00:00:00 2001
 From: David LeGare <legare@google.com>
-Date: Mon, 13 Jun 2022 22:23:23 +0000
+Date: Wed, 22 Jun 2022 18:39:50 +0000
 Subject: [PATCH] Add support for the Trusty OS
 
+Change-Id: I7f99f36b85ff5ed2bf71c0d8f6561e32fa25105d
 ---
- src/lib.rs    |  6 ++++++
- src/trusty.rs | 60 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 66 insertions(+)
+ src/lib.rs    |  6 +++++
+ src/trusty.rs | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 69 insertions(+)
  create mode 100644 src/trusty.rs
 
 diff --git a/src/lib.rs b/src/lib.rs
-index cce80f8c..a7eddaf2 100644
+index ac86322b..cf307958 100644
 --- a/src/lib.rs
 +++ b/src/lib.rs
-@@ -144,6 +144,12 @@ cfg_if! {
+@@ -145,6 +145,12 @@ cfg_if! {
  
          mod hermit;
          pub use hermit::*;
@@ -28,10 +29,10 @@ index cce80f8c..a7eddaf2 100644
          pub use fixed_width_ints::*;
 diff --git a/src/trusty.rs b/src/trusty.rs
 new file mode 100644
-index 00000000..f06c0760
+index 00000000..c7e4e4fa
 --- /dev/null
 +++ b/src/trusty.rs
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,63 @@
 +pub use core::ffi::c_void;
 +
 +pub type size_t = usize;
@@ -72,6 +73,8 @@ index 00000000..f06c0760
 +pub type c_int32_t = i32;
 +pub type c_int64_t = i64;
 +
++pub type time_t = c_long;
++
 +pub const STDOUT_FILENO: ::c_int = 1;
 +pub const STDERR_FILENO: ::c_int = 2;
 +
@@ -84,6 +87,7 @@ index 00000000..f06c0760
 +    pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
 +    pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
 +    pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
++    pub fn strlen(cs: *const c_char) -> size_t;
 +}
 +
 +s! {
@@ -93,4 +97,5 @@ index 00000000..f06c0760
 +    }
 +}
 -- 
-2.36.1.476.g0c4daa206d-goog
+2.37.0.rc0.104.g0611611a94-goog
+

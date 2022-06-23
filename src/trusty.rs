@@ -38,6 +38,8 @@ pub type c_int16_t = i16;
 pub type c_int32_t = i32;
 pub type c_int64_t = i64;
 
+pub type time_t = c_long;
+
 pub const STDOUT_FILENO: ::c_int = 1;
 pub const STDERR_FILENO: ::c_int = 2;
 
@@ -50,6 +52,7 @@ extern "C" {
     pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
     pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
     pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
+    pub fn strlen(cs: *const c_char) -> size_t;
 }
 
 s! {
