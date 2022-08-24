@@ -67,7 +67,7 @@ rust_library {
     ],
     apex_available: [
         "//apex_available:platform",
-        "com.android.bluetooth",
+        "com.android.btservices",
         "com.android.compos",
         "com.android.resolv",
         "com.android.uwb",
