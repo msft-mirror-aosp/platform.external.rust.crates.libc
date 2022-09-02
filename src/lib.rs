@@ -25,12 +25,13 @@
 #![cfg_attr(not(feature = "rustc-dep-of-std"), no_std)]
 #![cfg_attr(feature = "rustc-dep-of-std", no_core)]
 #![cfg_attr(
-    any(feature = "rustc-dep-of-std", target_os = "redox"),
-    feature(static_nobundle, native_link_modifiers, native_link_modifiers_bundle)
+    feature = "rustc-dep-of-std",
+    feature(native_link_modifiers, native_link_modifiers_bundle)
 )]
 #![cfg_attr(libc_const_extern_fn, feature(const_extern_fn))]
 
 // ANDROID: Use std to allow building as a dylib.
+#[cfg(android_dylib)]
 extern crate std;
 
 #[macro_use]
@@ -144,6 +145,12 @@ cfg_if! {
 
         mod hermit;
         pub use hermit::*;
+    } else if #[cfg(target_os = "trusty")] {
+        mod fixed_width_ints;
+        pub use fixed_width_ints::*;
+
+        mod trusty;
+        pub use trusty::*;
     } else if #[cfg(all(target_env = "sgx", target_vendor = "fortanix"))] {
         mod fixed_width_ints;
         pub use fixed_width_ints::*;
