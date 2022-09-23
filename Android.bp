@@ -67,11 +67,7 @@ rust_library {
     ],
     apex_available: [
         "//apex_available:platform",
-        "com.android.btservices",
-        "com.android.compos",
-        "com.android.resolv",
-        "com.android.uwb",
-        "com.android.virt",
+        "//apex_available:anyapex"
     ],
     vendor_available: true,
     min_sdk_version: "29",
