@@ -39,11 +39,10 @@ license {
 
 rust_library {
     name: "liblibc",
-    // has rustc warnings
     host_supported: true,
     crate_name: "libc",
     cargo_env_compat: true,
-    cargo_pkg_version: "0.2.126",
+    cargo_pkg_version: "0.2.138",
     srcs: ["src/lib.rs"],
     edition: "2015",
     features: [
@@ -55,6 +54,7 @@ rust_library {
         "freebsd11",
         "libc_align",
         "libc_cfg_target_vendor",
+        "libc_const_extern_fn",
         "libc_const_size_of",
         "libc_core_cvoid",
         "libc_int128",
@@ -67,7 +67,7 @@ rust_library {
     ],
     apex_available: [
         "//apex_available:platform",
-        "//apex_available:anyapex"
+        "//apex_available:anyapex",
     ],
     vendor_available: true,
     min_sdk_version: "29",
