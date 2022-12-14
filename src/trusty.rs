@@ -3,6 +3,8 @@ pub use core::ffi::c_void;
 pub type size_t = usize;
 pub type ssize_t = isize;
 
+pub type off_t = i64;
+
 #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 pub type c_char = u8;
 #[cfg(target_arch = "x86_64")]
@@ -43,6 +45,10 @@ pub type time_t = c_long;
 pub const STDOUT_FILENO: ::c_int = 1;
 pub const STDERR_FILENO: ::c_int = 2;
 
+pub const AT_PAGESZ: ::c_ulong = 6;
+
+pub const MAP_FAILED: *mut ::c_void = !0 as *mut ::c_void;
+
 extern "C" {
     pub fn calloc(nobj: size_t, size: size_t) -> *mut c_void;
     pub fn malloc(size: size_t) -> *mut c_void;
@@ -53,6 +59,16 @@ extern "C" {
     pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
     pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
     pub fn strlen(cs: *const c_char) -> size_t;
+    pub fn getauxval(type_: c_ulong) -> c_ulong;
+    pub fn mmap(
+        addr: *mut ::c_void,
+        len: ::size_t,
+        prot: ::c_int,
+        flags: ::c_int,
+        fd: ::c_int,
+        offset: off_t,
+    ) -> *mut ::c_void;
+    pub fn munmap(addr: *mut ::c_void, len: ::size_t) -> ::c_int;
 }
 
 s! {
