@@ -169,9 +169,6 @@
       "name": "libbinder_rs-internal_test"
     },
     {
-      "name": "libcert_request_validator_tests"
-    },
-    {
       "name": "libidsig.test"
     },
     {
@@ -256,9 +253,6 @@
     },
     {
       "name": "libbinder_rs-internal_test"
-    },
-    {
-      "name": "libcert_request_validator_tests"
     },
     {
       "name": "libidsig.test"
