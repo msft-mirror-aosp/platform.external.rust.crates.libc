@@ -5,6 +5,9 @@
       "path": "external/rust/crates/anyhow"
     },
     {
+      "path": "external/rust/crates/async-stream"
+    },
+    {
       "path": "external/rust/crates/base64"
     },
     {
@@ -26,10 +29,28 @@
       "path": "external/rust/crates/crossbeam-utils"
     },
     {
+      "path": "external/rust/crates/flate2"
+    },
+    {
+      "path": "external/rust/crates/futures-channel"
+    },
+    {
+      "path": "external/rust/crates/futures-executor"
+    },
+    {
+      "path": "external/rust/crates/futures-test"
+    },
+    {
       "path": "external/rust/crates/futures-util"
     },
     {
       "path": "external/rust/crates/getrandom"
+    },
+    {
+      "path": "external/rust/crates/hashbrown"
+    },
+    {
+      "path": "external/rust/crates/hashlink"
     },
     {
       "path": "external/rust/crates/libsqlite3-sys"
@@ -96,6 +117,9 @@
     },
     {
       "path": "external/rust/crates/webpki"
+    },
+    {
+      "path": "external/rust/crates/zerocopy"
     }
   ],
   "presubmit": [
@@ -115,6 +139,21 @@
       "name": "authfs_device_test_src_lib"
     },
     {
+      "name": "avmdtool.test"
+    },
+    {
+      "name": "avmdtool_tests"
+    },
+    {
+      "name": "bluetooth_with_facades.test"
+    },
+    {
+      "name": "compos_verify.test"
+    },
+    {
+      "name": "composd_cmd.test"
+    },
+    {
       "name": "diced_open_dice_cbor_test"
     },
     {
@@ -131,6 +170,12 @@
     },
     {
       "name": "doh_unit_test"
+    },
+    {
+      "name": "encryptedstore.test"
+    },
+    {
+      "name": "fd_server.test"
     },
     {
       "name": "keystore2_client_tests"
@@ -169,10 +214,34 @@
       "name": "libbinder_rs-internal_test"
     },
     {
-      "name": "libidsig.test"
+      "name": "libcap_rust.test"
+    },
+    {
+      "name": "libdm_rust.test"
+    },
+    {
+      "name": "libkmr_hal_test"
+    },
+    {
+      "name": "libpvmfw_avb.integration_test"
+    },
+    {
+      "name": "libuwb_adaptation_jni_tests"
+    },
+    {
+      "name": "libuwb_core_tests"
+    },
+    {
+      "name": "libuwb_uci_jni_rust_tests"
     },
     {
       "name": "microdroid_manager_test"
+    },
+    {
+      "name": "open_then_run.test"
+    },
+    {
+      "name": "rialto_test"
     },
     {
       "name": "rustBinderTest"
@@ -181,7 +250,13 @@
       "name": "rustBinderTestService"
     },
     {
-      "name": "virtualizationservice_device_test"
+      "name": "virtualizationmanager_device_test"
+    },
+    {
+      "name": "vm.test"
+    },
+    {
+      "name": "vmbase_example.integration_test"
     }
   ],
   "presubmit-rust": [
@@ -201,6 +276,21 @@
       "name": "authfs_device_test_src_lib"
     },
     {
+      "name": "avmdtool.test"
+    },
+    {
+      "name": "avmdtool_tests"
+    },
+    {
+      "name": "bluetooth_with_facades.test"
+    },
+    {
+      "name": "compos_verify.test"
+    },
+    {
+      "name": "composd_cmd.test"
+    },
+    {
       "name": "diced_open_dice_cbor_test"
     },
     {
@@ -217,6 +307,12 @@
     },
     {
       "name": "doh_unit_test"
+    },
+    {
+      "name": "encryptedstore.test"
+    },
+    {
+      "name": "fd_server.test"
     },
     {
       "name": "keystore2_client_tests"
@@ -255,10 +351,34 @@
       "name": "libbinder_rs-internal_test"
     },
     {
-      "name": "libidsig.test"
+      "name": "libcap_rust.test"
+    },
+    {
+      "name": "libdm_rust.test"
+    },
+    {
+      "name": "libkmr_hal_test"
+    },
+    {
+      "name": "libpvmfw_avb.integration_test"
+    },
+    {
+      "name": "libuwb_adaptation_jni_tests"
+    },
+    {
+      "name": "libuwb_core_tests"
+    },
+    {
+      "name": "libuwb_uci_jni_rust_tests"
     },
     {
       "name": "microdroid_manager_test"
+    },
+    {
+      "name": "open_then_run.test"
+    },
+    {
+      "name": "rialto_test"
     },
     {
       "name": "rustBinderTest"
@@ -267,7 +387,13 @@
       "name": "rustBinderTestService"
     },
     {
-      "name": "virtualizationservice_device_test"
+      "name": "virtualizationmanager_device_test"
+    },
+    {
+      "name": "vm.test"
+    },
+    {
+      "name": "vmbase_example.integration_test"
     }
   ]
 }
