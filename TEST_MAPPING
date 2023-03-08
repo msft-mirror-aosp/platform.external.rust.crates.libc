@@ -8,9 +8,6 @@
       "path": "external/rust/crates/async-stream"
     },
     {
-      "path": "external/rust/crates/base64"
-    },
-    {
       "path": "external/rust/crates/cast"
     },
     {
