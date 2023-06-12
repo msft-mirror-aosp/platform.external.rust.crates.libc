@@ -1579,6 +1579,23 @@ pub const FIONREAD: ::c_int = 0x541B;
 pub const TIOCCONS: ::c_int = 0x541D;
 pub const TIOCSBRK: ::c_int = 0x5427;
 pub const TIOCCBRK: ::c_int = 0x5428;
+cfg_if! {
+    if #[cfg(any(target_arch = "x86",
+                 target_arch = "x86_64",
+                 target_arch = "arm",
+                 target_arch = "aarch64",
+                 target_arch = "riscv64",
+                 target_arch = "s390x"))] {
+        pub const FICLONE: ::c_int = 0x40049409;
+        pub const FICLONERANGE: ::c_int = 0x4020940D;
+    } else if #[cfg(any(target_arch = "mips",
+                        target_arch = "mips64",
+                        target_arch = "powerpc",
+                        target_arch = "powerpc64"))] {
+        pub const FICLONE: ::c_int = 0x80049409;
+        pub const FICLONERANGE: ::c_int = 0x8020940D;
+    }
+}
 
 pub const ST_RDONLY: ::c_ulong = 1;
 pub const ST_NOSUID: ::c_ulong = 2;
@@ -1605,6 +1622,14 @@ pub const AI_V4MAPPED_CFG: ::c_int = 0x00000200;
 pub const AI_ADDRCONFIG: ::c_int = 0x00000400;
 pub const AI_V4MAPPED: ::c_int = 0x00000800;
 pub const AI_DEFAULT: ::c_int = AI_V4MAPPED_CFG | AI_ADDRCONFIG;
+
+// linux/kexec.h
+pub const KEXEC_ON_CRASH: ::c_int = 0x00000001;
+pub const KEXEC_PRESERVE_CONTEXT: ::c_int = 0x00000002;
+pub const KEXEC_ARCH_MASK: ::c_int = 0xffff0000;
+pub const KEXEC_FILE_UNLOAD: ::c_int = 0x00000001;
+pub const KEXEC_FILE_ON_CRASH: ::c_int = 0x00000002;
+pub const KEXEC_FILE_NO_INITRAMFS: ::c_int = 0x00000004;
 
 pub const LINUX_REBOOT_MAGIC1: ::c_int = 0xfee1dead;
 pub const LINUX_REBOOT_MAGIC2: ::c_int = 672274793;
@@ -2121,6 +2146,10 @@ pub const PT_HIOS: u32 = 0x6fffffff;
 pub const PT_LOPROC: u32 = 0x70000000;
 pub const PT_HIPROC: u32 = 0x7fffffff;
 
+// uapi/linux/mount.h
+pub const OPEN_TREE_CLONE: ::c_uint = 0x01;
+pub const OPEN_TREE_CLOEXEC: ::c_uint = O_CLOEXEC as ::c_uint;
+
 // linux/netfilter.h
 pub const NF_DROP: ::c_int = 0;
 pub const NF_ACCEPT: ::c_int = 1;
@@ -2437,8 +2466,7 @@ pub const IFF_PERSIST: ::c_int = 0x0800;
 pub const IFF_NOFILTER: ::c_int = 0x1000;
 
 // start android/platform/bionic/libc/kernel/uapi/linux/if_ether.h
-// from https://android.googlesource.com/
-// platform/bionic/+/master/libc/kernel/uapi/linux/if_ether.h
+// from https://android.googlesource.com/platform/bionic/+/HEAD/libc/kernel/uapi/linux/if_ether.h
 pub const ETH_ALEN: ::c_int = 6;
 pub const ETH_HLEN: ::c_int = 14;
 pub const ETH_ZLEN: ::c_int = 60;
@@ -2727,6 +2755,18 @@ pub const SCHED_DEADLINE: ::c_int = 6;
 pub const SCHED_RESET_ON_FORK: ::c_int = 0x40000000;
 
 pub const CLONE_PIDFD: ::c_int = 0x1000;
+
+// linux/membarrier.h
+pub const MEMBARRIER_CMD_QUERY: ::c_int = 0;
+pub const MEMBARRIER_CMD_GLOBAL: ::c_int = 1 << 0;
+pub const MEMBARRIER_CMD_GLOBAL_EXPEDITED: ::c_int = 1 << 1;
+pub const MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED: ::c_int = 1 << 2;
+pub const MEMBARRIER_CMD_PRIVATE_EXPEDITED: ::c_int = 1 << 3;
+pub const MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED: ::c_int = 1 << 4;
+pub const MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE: ::c_int = 1 << 5;
+pub const MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE: ::c_int = 1 << 6;
+pub const MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ: ::c_int = 1 << 7;
+pub const MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ: ::c_int = 1 << 8;
 
 // linux/mempolicy.h
 pub const MPOL_DEFAULT: ::c_int = 0;
@@ -3507,7 +3547,15 @@ extern "C" {
         longindex: *mut ::c_int,
     ) -> ::c_int;
 
+    pub fn sync();
     pub fn syncfs(fd: ::c_int) -> ::c_int;
+
+    pub fn memmem(
+        haystack: *const ::c_void,
+        haystacklen: ::size_t,
+        needle: *const ::c_void,
+        needlelen: ::size_t,
+    ) -> *mut ::c_void;
 }
 
 cfg_if! {
