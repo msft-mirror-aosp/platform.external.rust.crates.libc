@@ -1,0 +1,7 @@
+28a29,34
+> 	-A unknown-lints \
+> 
+> MODULE_LIBRARY_DEPS += \
+> 	trusty/user/base/lib/libcompiler_builtins-rust \
+> 	trusty/user/base/lib/libcore-rust \
+> 	trusty/user/base/lib/libc-trusty \

@@ -1,0 +1,5 @@
+{
+  "patch": "patches/rules.mk.diff",
+  "features": "default,extra_traits,std",
+  "module_add_implicit_deps": false
+}
