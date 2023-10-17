@@ -42,7 +42,7 @@ rust_library {
     host_supported: true,
     crate_name: "libc",
     cargo_env_compat: true,
-    cargo_pkg_version: "0.2.138",
+    cargo_pkg_version: "0.2.146",
     srcs: ["src/lib.rs"],
     edition: "2015",
     features: [
@@ -58,6 +58,7 @@ rust_library {
         "libc_const_size_of",
         "libc_core_cvoid",
         "libc_int128",
+        "libc_long_array",
         "libc_non_exhaustive",
         "libc_packedN",
         "libc_priv_mod_use",
@@ -69,6 +70,7 @@ rust_library {
         "//apex_available:platform",
         "//apex_available:anyapex",
     ],
+    product_available: true,
     vendor_available: true,
     min_sdk_version: "29",
 }
