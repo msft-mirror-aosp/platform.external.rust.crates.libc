@@ -1,0 +1,4 @@
+{
+  "patch": "patches/rules.mk.diff",
+  "module_add_implicit_deps": false
+}
