@@ -1,0 +1,32 @@
+From ec3dab63a07ca05b93ecb68686bf1f0699d172eb Mon Sep 17 00:00:00 2001
+From: Orlando Arbildo <oarbildo@google.com>
+Date: Thu, 30 Nov 2023 19:19:19 +0000
+Subject: [PATCH] Add PROT_READ and PROT_WRITE constants to trusty
+
+Adding PROT_READ and PROT_WRITE libc constants to
+trusty.
+
+Bug: 284156656
+Change-Id: I62797b2eb26775fd4ef161c9f59641aab8a066aa
+---
+ src/trusty.rs | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/trusty.rs b/src/trusty.rs
+index 140fa6df..eca27bf7 100644
+--- a/src/trusty.rs
++++ b/src/trusty.rs
+@@ -1,5 +1,10 @@
++extern crate trusty_sys;
++
+ pub use core::ffi::c_void;
+ 
++pub const PROT_READ: i32 = self::trusty_sys::MMAP_FLAG_PROT_READ as i32;
++pub const PROT_WRITE: i32 = self::trusty_sys::MMAP_FLAG_PROT_WRITE as i32;
++
+ pub type size_t = usize;
+ pub type ssize_t = isize;
+ 
+-- 
+2.43.0.rc2.451.g8631bc7472-goog
+

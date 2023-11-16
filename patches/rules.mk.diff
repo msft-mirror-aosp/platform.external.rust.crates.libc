@@ -2,7 +2,7 @@ diff --git a/rules.mk b/rules.mk
 index 92f34db68..08cf2d6c3 100644
 --- a/rules.mk
 +++ b/rules.mk
-@@ -27,8 +27,11 @@
+@@ -27,8 +27,12 @@
  	--cfg 'libc_ptr_addr_of' \
  	--cfg 'libc_underscore_const_names' \
  	--cfg 'libc_union' \
@@ -13,4 +13,5 @@ index 92f34db68..08cf2d6c3 100644
 +	trusty/user/base/lib/libcompiler_builtins-rust \
 +	trusty/user/base/lib/libcore-rust \
 +	trusty/user/base/lib/libc-trusty \
++	trusty/user/base/lib/trusty-sys \
 
