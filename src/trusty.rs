@@ -58,6 +58,7 @@ extern "C" {
     pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
     pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
     pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
+    pub fn close(fd: ::c_int) -> ::c_int;
     pub fn strlen(cs: *const c_char) -> size_t;
     pub fn getauxval(type_: c_ulong) -> c_ulong;
     pub fn mmap(
