@@ -1,20 +1,8 @@
-From b81e3bd53bb4c60e6a778fa230cb8fd2a73b3683 Mon Sep 17 00:00:00 2001
-From: David LeGare <legare@google.com>
-Date: Wed, 22 Jun 2022 18:39:50 +0000
-Subject: [PATCH] Add support for the Trusty OS
-
-Change-Id: I7f99f36b85ff5ed2bf71c0d8f6561e32fa25105d
----
- src/lib.rs    |  6 +++++
- src/trusty.rs | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 69 insertions(+)
- create mode 100644 src/trusty.rs
-
-diff --git a/src/lib.rs b/src/lib.rs
-index ac86322b..cf307958 100644
---- a/src/lib.rs
-+++ b/src/lib.rs
-@@ -145,6 +145,12 @@ cfg_if! {
+diff --git b/src/lib.rs a/src/lib.rs
+index 62748d279..4d8822ec2 100644
+--- b/src/lib.rs
++++ a/src/lib.rs
+@@ -143,6 +143,12 @@ cfg_if! {
  
          mod hermit;
          pub use hermit::*;
@@ -27,16 +15,18 @@ index ac86322b..cf307958 100644
      } else if #[cfg(all(target_env = "sgx", target_vendor = "fortanix"))] {
          mod fixed_width_ints;
          pub use fixed_width_ints::*;
-diff --git a/src/trusty.rs b/src/trusty.rs
+diff --git b/src/trusty.rs a/src/trusty.rs
 new file mode 100644
-index 00000000..c7e4e4fa
+index 000000000..140fa6dfe
 --- /dev/null
-+++ b/src/trusty.rs
-@@ -0,0 +1,63 @@
++++ a/src/trusty.rs
+@@ -0,0 +1,80 @@
 +pub use core::ffi::c_void;
 +
 +pub type size_t = usize;
 +pub type ssize_t = isize;
++
++pub type off_t = i64;
 +
 +#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 +pub type c_char = u8;
@@ -78,6 +68,10 @@ index 00000000..c7e4e4fa
 +pub const STDOUT_FILENO: ::c_int = 1;
 +pub const STDERR_FILENO: ::c_int = 2;
 +
++pub const AT_PAGESZ: ::c_ulong = 6;
++
++pub const MAP_FAILED: *mut ::c_void = !0 as *mut ::c_void;
++
 +extern "C" {
 +    pub fn calloc(nobj: size_t, size: size_t) -> *mut c_void;
 +    pub fn malloc(size: size_t) -> *mut c_void;
@@ -87,7 +81,18 @@ index 00000000..c7e4e4fa
 +    pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
 +    pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
 +    pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
++    pub fn close(fd: ::c_int) -> ::c_int;
 +    pub fn strlen(cs: *const c_char) -> size_t;
++    pub fn getauxval(type_: c_ulong) -> c_ulong;
++    pub fn mmap(
++        addr: *mut ::c_void,
++        len: ::size_t,
++        prot: ::c_int,
++        flags: ::c_int,
++        fd: ::c_int,
++        offset: off_t,
++    ) -> *mut ::c_void;
++    pub fn munmap(addr: *mut ::c_void, len: ::size_t) -> ::c_int;
 +}
 +
 +s! {
@@ -96,6 +101,3 @@ index 00000000..c7e4e4fa
 +        pub iov_len: ::size_t,
 +    }
 +}
--- 
-2.37.0.rc0.104.g0611611a94-goog
-
