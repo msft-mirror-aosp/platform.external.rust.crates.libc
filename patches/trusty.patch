@@ -4,8 +4,8 @@ index 62748d279..4d8822ec2 100644
 +++ a/src/lib.rs
 @@ -143,6 +143,12 @@ cfg_if! {
  
-         mod hermit;
-         pub use hermit::*;
+         mod teeos;
+         pub use teeos::*;
 +    } else if #[cfg(target_os = "trusty")] {
 +        mod fixed_width_ints;
 +        pub use fixed_width_ints::*;
