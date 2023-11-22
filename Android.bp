@@ -42,7 +42,7 @@ rust_library {
     host_supported: true,
     crate_name: "libc",
     cargo_env_compat: true,
-    cargo_pkg_version: "0.2.146",
+    cargo_pkg_version: "0.2.150",
     srcs: ["src/lib.rs"],
     edition: "2015",
     features: [
