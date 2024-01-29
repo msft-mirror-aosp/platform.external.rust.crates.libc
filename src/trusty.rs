@@ -1,4 +1,9 @@
+extern crate trusty_sys;
+
 pub use core::ffi::c_void;
+
+pub const PROT_READ: i32 = self::trusty_sys::MMAP_FLAG_PROT_READ as i32;
+pub const PROT_WRITE: i32 = self::trusty_sys::MMAP_FLAG_PROT_WRITE as i32;
 
 pub type size_t = usize;
 pub type ssize_t = isize;
