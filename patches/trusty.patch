@@ -2,7 +2,7 @@ diff --git b/src/lib.rs a/src/lib.rs
 index 62748d279..4d8822ec2 100644
 --- b/src/lib.rs
 +++ a/src/lib.rs
-@@ -143,6 +143,12 @@ cfg_if! {
+@@ -145,6 +145,12 @@ cfg_if! {
  
          mod teeos;
          pub use teeos::*;
@@ -20,8 +20,13 @@ new file mode 100644
 index 000000000..140fa6dfe
 --- /dev/null
 +++ a/src/trusty.rs
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,85 @@
++extern crate trusty_sys;
++
 +pub use core::ffi::c_void;
++
++pub const PROT_READ: i32 = self::trusty_sys::MMAP_FLAG_PROT_READ as i32;
++pub const PROT_WRITE: i32 = self::trusty_sys::MMAP_FLAG_PROT_WRITE as i32;
 +
 +pub type size_t = usize;
 +pub type ssize_t = isize;

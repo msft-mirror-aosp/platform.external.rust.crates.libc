@@ -2,16 +2,15 @@ diff --git a/rules.mk b/rules.mk
 index 92f34db68..08cf2d6c3 100644
 --- a/rules.mk
 +++ b/rules.mk
-@@ -24,8 +24,12 @@ MODULE_RUSTFLAGS += \
+@@ -24,5 +24,12 @@
  	--cfg 'libc_ptr_addr_of' \
  	--cfg 'libc_underscore_const_names' \
  	--cfg 'libc_union' \
 +	-A unknown-lints \
- 
- MODULE_LIBRARY_DEPS := \
- 	external/rust/crates/rustc-std-workspace-core \
++
++MODULE_LIBRARY_DEPS := \
 +	trusty/user/base/lib/libcompiler_builtins-rust \
 +	trusty/user/base/lib/libcore-rust \
 +	trusty/user/base/lib/libc-trusty \
- 
- include make/library.mk
++	trusty/user/base/lib/trusty-sys \
+
