@@ -1,5 +1,5 @@
 diff --git b/src/lib.rs a/src/lib.rs
-index 62748d279..4d8822ec2 100644
+index dd9b9df1..a0a0372d 100644
 --- b/src/lib.rs
 +++ a/src/lib.rs
 @@ -145,6 +145,12 @@ cfg_if! {
@@ -17,10 +17,10 @@ index 62748d279..4d8822ec2 100644
          pub use fixed_width_ints::*;
 diff --git b/src/trusty.rs a/src/trusty.rs
 new file mode 100644
-index 000000000..140fa6dfe
+index 00000000..7f1c6399
 --- /dev/null
 +++ a/src/trusty.rs
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,98 @@
 +#[cfg(feature = "trusty_sys")]
 +extern crate trusty_sys;
 +
@@ -74,6 +74,13 @@ index 000000000..140fa6dfe
 +
 +pub type time_t = c_long;
 +
++pub type clockid_t = c_int;
++pub const CLOCK_REALTIME: clockid_t = 0;
++pub struct timespec {
++    pub tv_sec: time_t,
++    pub tv_nsec: c_long,
++}
++
 +pub const STDOUT_FILENO: ::c_int = 1;
 +pub const STDERR_FILENO: ::c_int = 2;
 +
@@ -102,6 +109,8 @@ index 000000000..140fa6dfe
 +        offset: off_t,
 +    ) -> *mut ::c_void;
 +    pub fn munmap(addr: *mut ::c_void, len: ::size_t) -> ::c_int;
++    pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
++    pub fn nanosleep(rqtp: *const ::timespec, rmtp: *mut ::timespec) -> ::c_int;
 +}
 +
 +s! {
