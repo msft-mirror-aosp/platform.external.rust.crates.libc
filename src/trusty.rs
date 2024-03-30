@@ -51,6 +51,13 @@ pub type c_int64_t = i64;
 
 pub type time_t = c_long;
 
+pub type clockid_t = c_int;
+pub const CLOCK_REALTIME: clockid_t = 0;
+pub struct timespec {
+    pub tv_sec: time_t,
+    pub tv_nsec: c_long,
+}
+
 pub const STDOUT_FILENO: ::c_int = 1;
 pub const STDERR_FILENO: ::c_int = 2;
 
@@ -79,6 +86,8 @@ extern "C" {
         offset: off_t,
     ) -> *mut ::c_void;
     pub fn munmap(addr: *mut ::c_void, len: ::size_t) -> ::c_int;
+    pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
+    pub fn nanosleep(rqtp: *const ::timespec, rmtp: *mut ::timespec) -> ::c_int;
 }
 
 s! {
