@@ -1,4 +1,13 @@
+#[cfg(feature = "trusty_sys")]
+extern crate trusty_sys;
+
 pub use core::ffi::c_void;
+
+#[cfg(feature = "trusty_sys")]
+pub const PROT_READ: i32 = self::trusty_sys::MMAP_FLAG_PROT_READ as i32;
+
+#[cfg(feature = "trusty_sys")]
+pub const PROT_WRITE: i32 = self::trusty_sys::MMAP_FLAG_PROT_WRITE as i32;
 
 pub type size_t = usize;
 pub type ssize_t = isize;
@@ -42,6 +51,13 @@ pub type c_int64_t = i64;
 
 pub type time_t = c_long;
 
+pub type clockid_t = c_int;
+pub const CLOCK_REALTIME: clockid_t = 0;
+pub struct timespec {
+    pub tv_sec: time_t,
+    pub tv_nsec: c_long,
+}
+
 pub const STDOUT_FILENO: ::c_int = 1;
 pub const STDERR_FILENO: ::c_int = 2;
 
@@ -58,6 +74,7 @@ extern "C" {
     pub fn posix_memalign(memptr: *mut *mut ::c_void, align: ::size_t, size: ::size_t) -> ::c_int;
     pub fn write(fd: ::c_int, buf: *const ::c_void, count: ::size_t) -> ::ssize_t;
     pub fn writev(fd: ::c_int, iov: *const ::iovec, iovcnt: ::c_int) -> ::ssize_t;
+    pub fn close(fd: ::c_int) -> ::c_int;
     pub fn strlen(cs: *const c_char) -> size_t;
     pub fn getauxval(type_: c_ulong) -> c_ulong;
     pub fn mmap(
@@ -69,6 +86,8 @@ extern "C" {
         offset: off_t,
     ) -> *mut ::c_void;
     pub fn munmap(addr: *mut ::c_void, len: ::size_t) -> ::c_int;
+    pub fn clock_gettime(clk_id: ::clockid_t, tp: *mut ::timespec) -> ::c_int;
+    pub fn nanosleep(rqtp: *const ::timespec, rmtp: *mut ::timespec) -> ::c_int;
 }
 
 s! {
